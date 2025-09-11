@@ -1,0 +1,766 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>User Profile - TraceBack (Inline Editor)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  /* ===== Theme ===== */
+  :root{
+    --bg:#f5f9fc; --text:#0f172a; --muted:#6b7b90; --brand:#1b6dc1; --brand-600:#155a99;
+    --card:#fff; --soft:#eef3f7; --soft-2:#f0f4f8; --border:#dfe6ee; --pill:#233247;
+    --tb-primary:#1b6dc1; --tb-dark:#1b263b; --tb-muted:#6b7280;
+  }
+  *{box-sizing:border-box}
+  body {margin:0; font-family:'Segoe UI', Tahoma, sans-serif; background:var(--bg); color:var(--text);}  
+
+  /* ===== Header (logo left, nav center, logout right) ===== */
+  header {
+    position:sticky; top:0; z-index:20;
+    background:#f0f4f8; border-bottom:2px solid #ccc;
+    display:grid; grid-template-columns:auto 1fr auto;
+    align-items:center; gap:16px; padding:10px 20px;
+  }
+  header .logo { justify-self:start; }
+  header .logo img { height:75px; display:block; }
+  header nav { justify-self:center; }
+  header nav a {
+    text-decoration:none; margin:0 10px; padding:8px 18px;
+    background:#eaeaea; border-radius:8px; font-weight:bold; color:#333;
+    box-shadow:0 2px 4px rgba(0,0,0,0.1); transition:0.3s;
+  }
+  header nav a:hover { background:#dcdcdc; }
+  header nav a.active { background:#1b263b; color:#fff; }
+  .logout-btn {
+    justify-self:end;
+    background:#ccc; padding:8px 16px; border-radius:8px;
+    text-decoration:none; color:#333; font-weight:bold; cursor:pointer;
+  }
+
+  /* ===== Main ===== */
+  .wrap { margin-left:0; padding:18px; }
+  .card {max-width:1000px; margin:0 auto 16px; background:var(--card); border-radius:12px; overflow:hidden; box-shadow:0 8px 22px rgba(0,0,0,.08);} 
+  .banner {width:100%; height:200px; object-fit:cover; background:#dfe7f7;}
+  .row {display:flex; align-items:center; gap:14px; padding:16px;}
+  .pfp {width:82px; height:82px; border-radius:50%; border:3px solid #fff; object-fit:cover; margin-top:-54px; box-shadow:0 8px 20px rgba(0,0,0,.12);} 
+  .meta {flex:1;}
+  .name {margin:0; font-size:20px; font-weight:800;}
+  .email {margin:4px 0 0; color:var(--muted); font-size:13px;}
+  .id-row{display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap}
+  .id-label{font-weight:700; color:#334155}
+
+  .edit {background:var(--brand); color:#fff; border:0; border-radius:8px; padding:10px 14px; cursor:pointer; font-weight:bold;}
+  .edit:hover {background:var(--brand-600);} 
+
+  /* Badges */
+  .badge {display:inline-block; padding:2px 8px; border-radius:9999px; font-size:12px; background:#e2e8f0; color:#334155; border:1px solid #d1d5db}
+  .badge.ok{background:#e6ffed; color:#0f5132; border-color:#a3e3b1}
+  .badge.no{background:#fff1f2; color:#7f1d1d; border-color:#fecaca}
+
+  /* Toggle switch */
+  .switch{position:relative; display:inline-block; width:44px; height:24px}
+  .switch input{opacity:0; width:0; height:0}
+  .slider{position:absolute; cursor:pointer; inset:0; background:#cbd5e1; transition:.2s; border-radius:24px}
+  .slider:before{position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; transition:.2s; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch input:checked + .slider{background:var(--brand)}
+  .switch input:checked + .slider:before{transform:translateX(20px)}
+
+  /* ===== Drawer (Inline Editor) ===== */
+  .drawer{position:fixed; inset:0 0 0 auto; width:460px; max-width:96vw; background:#fff; box-shadow:-12px 0 30px rgba(0,0,0,.1); transform:translateX(100%); transition:transform .25s ease; z-index:60; display:flex; flex-direction:column}
+  .drawer.open{transform:translateX(0)}
+  .drawer-header{display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid #e5e7eb}
+  .drawer-title{margin:0; font-size:18px; font-weight:800}
+  .drawer-body{padding:12px 16px; overflow:auto}
+  .drawer-footer{display:flex; gap:10px; padding:12px 16px; border-top:1px solid #e5e7eb}
+  .btn{border:0; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer}
+  .btn.save{background:var(--brand); color:#fff}
+  .btn.save:hover{background:var(--brand-600)}
+  .btn.cancel{background:#e2e8f0}
+
+  .tablist{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 14px}
+  .tablist button{background:#eef2f7; border:0; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer}
+  .tablist button[aria-selected="true"]{background:var(--brand); color:#fff}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  .field{margin-bottom:12px}
+  .field label{display:block; font-weight:700; font-size:13px; margin-bottom:6px; color:#334155}
+  .field input[type="text"], .field input[type="email"], .field input[type="date"], .field input[type="tel"], .field textarea, .field select{width:100%; padding:10px 12px; border:1px solid #cfd8e3; border-radius:10px; background:#f8fafc; outline:none}
+  .field textarea{min-height:72px; resize:vertical}
+  .field .hint{font-size:12px; color:#64748b; margin-top:6px}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+
+  /* Image pickers */
+  .img-picker{display:flex; align-items:center; gap:12px}
+  .img-picker img{width:48px; height:48px; border-radius:8px; object-fit:cover; border:1px solid #e5e7eb}
+  .img-picker input{flex:1}
+
+  /* ===== Logout Modal ===== */
+  .modal {display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); place-items:center; z-index:50;}
+  .modal-content {background:#fff; border-radius:12px; padding:20px; min-width:280px; text-align:center;}
+  .modal-content button {margin:8px; padding:8px 14px; border:0; border-radius:8px; font-weight:bold; cursor:pointer;}
+  .btn-no {background:#d0d5dd;}
+  .btn-yes {background:#1b263b; color:#fff;}
+
+  /* ====== Chat Widget ====== */
+  .tb-fab{
+    position: fixed; right: 22px; bottom: 22px; z-index: 1200;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--tb-primary); color:#fff; border:none; box-shadow:0 10px 24px rgba(27,109,193,.35);
+    display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;
+  }
+  .tb-fab:active{ transform: translateY(1px); }
+  .tb-window{
+    position: fixed; right: 22px; bottom: 22px; z-index: 1201;
+    width: 920px; max-width: 96vw; height: 560px; max-height: 78vh;
+    background:#fff; border:1px solid #e5e7eb; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,.2); display: none;
+  }
+  .tb-window.open{ display:block; }
+  .tb-head{height:56px; background: linear-gradient(90deg,#f8fafc,#eef2ff);
+    border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; padding:0 12px 0 14px;}
+  .tb-head .brand{display:flex; gap:10px; align-items:center;}
+  .tb-head .logo{width:30px;height:30px;border-radius:8px;background:var(--tb-dark);color:#fff;display:grid;place-items:center;font-weight:700}
+  .tb-head .title{font-weight:600;font-size:14px}
+  .tb-head .subtitle{font-size:11px;color:var(--tb-muted)}
+  .tb-head .actions button{background:#fff;border:1px solid #e5e7eb;color:#333;border-radius:8px;padding:6px 8px;margin-left:6px;cursor:pointer}
+  .tb-head .actions button:hover{background:#f3f4f6}
+  .tb-body{display:grid; grid-template-columns: 320px 1fr; height: calc(100% - 56px);}
+  .tb-side{border-right:1px solid #e5e7eb; display:flex; flex-direction:column}
+  .tb-tabs{padding:10px}
+  .tb-tabs .tab{width:50%; padding:10px 0; border-radius:10px; font-weight:600; font-size:13px; cursor:pointer; border:1px solid #e5e7eb; background:#fff}
+  .tb-tabs .tab.active{background:#fff;color:#111; box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.05); border-color:#d1d5db}
+  .tb-tab-wrap{display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#f3f4f6; border-radius:12px; padding:6px}
+  .tb-search{padding:0 12px 10px}
+  .tb-search input{width:100%; padding:9px 12px; border:1px solid #e5e7eb; border-radius:10px; font-size:13px}
+  .tb-list{overflow:auto}
+  .tb-item{display:flex; gap:10px; padding:10px 12px; border-top:1px solid #f1f5f9; cursor:pointer;}
+  .tb-item:hover{background:#f8fafc}
+  .tb-item.active{background:#eef2ff}
+  .tb-avatar{width:42px;height:42px;border-radius:999px;background:#e5e7eb;display:grid;place-items:center;font-weight:700}
+  .tb-meta{flex:1; min-width:0}
+  .tb-line{display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .tb-name{font-weight:600; font-size:14px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+  .tb-time{font-size:11px;color:var(--tb-muted)}
+  .tb-last{font-size:12px;color:var(--tb-muted); overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+  .tb-pill{font-size:10px; border:1px solid #e5e7eb; padding:2px 6px; border-radius:999px; color:#374151}
+  .tb-conv{display:flex; flex-direction:column;}
+  .tb-conv-head{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #e5e7eb}
+  .tb-conv-title{font-weight:700}
+  .tb-status{margin-left:auto; display:flex; gap:6px}
+  .tb-status button{font-size:11px; padding:4px 8px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; cursor:pointer}
+  .tb-status button.active{background:var(--tb-primary); color:#fff; border-color:var(--tb-primary)}
+  .tb-messages{flex:1; overflow:auto; background:linear-gradient(#fff,#f8fafc); padding:16px}
+  .tb-bubble{ max-width:72%; padding:10px 12px; border-radius:14px; margin:6px 0; font-size:14px; line-height:1.35; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+  .tb-bubble.me{margin-left:auto; background:var(--tb-primary); color:#fff; border-bottom-right-radius:4px}
+  .tb-bubble.them{margin-right:auto; background:#eef2ff; color:#111; border-bottom-left-radius:4px}
+  .tb-bubble time{display:block; font-size:10px; opacity:.8; margin-top:4px}
+  .tb-compose{border-top:1px solid #e5e7eb; padding:10px; display:flex; gap:10px}
+  .tb-compose textarea{flex:1; resize:none; min-height:38px; max-height:110px; border:1px solid #e5e7eb; border-radius:10px; padding:9px 10px; font-size:14px}
+  .tb-send{background:var(--tb-primary); color:#fff; padding:10px 16px; border-radius:10px; font-weight:700}
+  .tb-send:disabled{background:#9bbde2}
+  @media (max-width: 700px){
+    .tb-body{grid-template-columns:1fr;}
+    .tb-side{display:none}
+  }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <a href="user.html"><img src="TRACEBACK.png" alt="TraceBack Logo"></a>
+  </div>
+
+  <nav>
+    <a href="profile.html" class="active">Profile Management</a>
+    <a href="search.html">Search Item</a>
+    <a href="report.html">Write a Report</a>
+  </nav>
+
+  <a href="#" class="logout-btn" onclick="openLogoutModal()">Log Out</a>
+</header>
+
+<!-- Main -->
+<main class="wrap">
+  <section class="card" aria-labelledby="profileTitle">
+    <img id="bannerImg" class="banner" src="default-banner.jpg" alt="Banner" />
+    <div class="row">
+      <img id="profilePic" class="pfp" src="default-profile.png" alt="Profile" />
+      <div class="meta">
+        <h2 id="displayName" class="name">User Name</h2>
+        <p id="displayEmail" class="email">user@email.com</p>
+
+        <div class="id-row">
+          <span class="id-label">IC:</span>
+          <span id="displayIC" class="id-value" aria-live="polite">Not set</span>
+
+          <label class="switch" title="Activate IC" aria-label="Activate IC">
+            <input id="icActiveToggle" type="checkbox" />
+            <span class="slider" aria-hidden="true"></span>
+          </label>
+          <span id="icStatus" class="badge no" aria-live="polite">Inactive</span>
+        </div>
+      </div>
+
+      <!-- ONE Edit button (inside the card) -->
+      <button class="edit" id="openEditorBtn" type="button" aria-expanded="false" aria-controls="editDrawer">
+        <i class="fa fa-pen" aria-hidden="true"></i> Edit Profile
+      </button>
+    </div>
+  </section>
+</main>
+
+<!-- Inline Editor Drawer -->
+<aside id="editDrawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="editTitle" aria-hidden="true">
+  <div class="drawer-header">
+    <h3 id="editTitle" class="drawer-title">Edit Profile</h3>
+    <button class="btn cancel" id="closeEditorBtn" type="button" aria-label="Close editor"><i class="fa fa-times"></i></button>
+  </div>
+
+  <div class="drawer-body">
+    <div class="tablist" role="tablist" aria-label="Profile sections">
+      <button role="tab" id="tab-personal" class="tab" aria-selected="true" aria-controls="panel-personal" data-tab="personal">Personal</button>
+      <button role="tab" id="tab-contact" class="tab" aria-selected="false" aria-controls="panel-contact" data-tab="contact">Contact</button>
+      <button role="tab" id="tab-id" class="tab" aria-selected="false" aria-controls="panel-id" data-tab="id">Identification</button>
+      <button role="tab" id="tab-account" class="tab" aria-selected="false" aria-controls="panel-account" data-tab="account">Account</button>
+      <button role="tab" id="tab-media" class="tab" aria-selected="false" aria-controls="panel-media" data-tab="media">Photos</button>
+    </div>
+
+    <section id="panel-personal" class="panel active" role="tabpanel" aria-labelledby="tab-personal">
+      <div class="field">
+        <label for="fullName">Full Name</label>
+        <input id="fullName" type="text" placeholder="e.g., Jane Doe" autocomplete="name" />
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="dob">Date of Birth</label>
+          <input id="dob" type="date" />
+        </div>
+        <div class="field">
+          <label for="gender">Gender</label>
+          <select id="gender">
+            <option value="">— Select —</option>
+            <option>Female</option>
+            <option>Male</option>
+            <option>Other</option>
+            <option>Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-contact" class="panel" role="tabpanel" aria-labelledby="tab-contact">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="name@example.com" autocomplete="email" />
+        <p class="hint">This email also shows at the top under your name.</p>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="phone">Phone</label>
+          <input id="phone" type="tel" placeholder="e.g., +60 12-345 6789" autocomplete="tel" />
+        </div>
+        <div class="field">
+          <label for="altPhone">Alternate Phone</label>
+          <input id="altPhone" type="tel" placeholder="Optional" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="address">Address</label>
+        <textarea id="address" placeholder="Street, City, State, Postcode"></textarea>
+      </div>
+    </section>
+
+    <section id="panel-id" class="panel" role="tabpanel" aria-labelledby="tab-id">
+      <div class="field">
+        <label for="icNumber">IC Number (NRIC)</label>
+        <input id="icNumber" type="text" inputmode="numeric" pattern="\d{12}" maxlength="12" placeholder="12 digits" />
+        <p id="icHint" class="hint">Enter 12 digits (e.g., 901010011234). Activation is available immediately.</p>
+      </div>
+      <div class="field">
+        <label class="id-label" for="icActive">IC Activation</label>
+        <div>
+          <label class="switch">
+            <input id="icActive" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+          <span id="icActiveText" class="badge no" style="margin-left:8px">Inactive</span>
+        </div>
+        <p class="hint">Toggle to activate without leaving this page. IC must be set and valid.</p>
+      </div>
+    </section>
+
+    <section id="panel-account" class="panel" role="tabpanel" aria-labelledby="tab-account">
+      <div class="field">
+        <label for="usernameHandle">Username</label>
+        <input id="usernameHandle" type="text" placeholder="Public handle (optional)" />
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="newPassword">New Password</label>
+          <input id="newPassword" type="password" placeholder="••••••••" />
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm Password</label>
+          <input id="confirmPassword" type="password" placeholder="Repeat password" />
+        </div>
+      </div>
+      <p class="hint">Passwords are stored only if you integrate with a backend. This demo keeps profile fields in your browser (localStorage).</p>
+    </section>
+
+    <section id="panel-media" class="panel" role="tabpanel" aria-labelledby="tab-media">
+      <div class="field">
+        <label>Profile Photo</label>
+        <div class="img-picker">
+          <img id="pfpPreview" src="default-profile.png" alt="Profile preview" />
+          <input id="pfpInput" type="file" accept="image/*" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Banner Photo</label>
+        <div class="img-picker">
+          <img id="bannerPreview" src="default-banner.jpg" alt="Banner preview" />
+          <input id="bannerInput" type="file" accept="image/*" />
+        </div>
+        <p class="hint">Images are saved to your browser storage for this demo.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="drawer-footer">
+    <button class="btn cancel" id="cancelBtn" type="button">Cancel</button>
+    <button class="btn save" id="saveBtn" type="button">Save Changes</button>
+  </div>
+</aside>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" aria-hidden="true">
+  <div class="modal-content">
+    <p id="logoutTitle" style="font-weight:700">Are you sure you want to Log Out?</p>
+    <button class="btn-no" onclick="closeLogoutModal()">No</button>
+    <button class="btn-yes" onclick="logout()">Yes</button>
+  </div>
+</div>
+
+<!-- ====== CHAT WIDGET UI ====== -->
+<button id="tbFab" class="tb-fab" title="Chat with staff">💬</button>
+
+<div id="tbChat" class="tb-window" aria-hidden="true">
+  <div class="tb-head">
+    <div class="brand">
+      <div class="logo">TB</div>
+      <div>
+        <div class="title">Inbox</div>
+        <div class="subtitle">Contact Staff & Tickets</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="tbMin">–</button>
+      <button id="tbClose">✕</button>
+    </div>
+  </div>
+
+  <div class="tb-body">
+    <aside class="tb-side">
+      <div class="tb-tabs">
+        <div class="tb-tab-wrap">
+          <button id="tabContact" class="tab active">Contact Staff</button>
+          <button id="tabTickets" class="tab">Tickets</button>
+        </div>
+      </div>
+      <div class="tb-search"><input id="tbSearch" placeholder="Search…" /></div>
+      <div id="tbList" class="tb-list" role="listbox" aria-label="Threads"></div>
+    </aside>
+
+    <section class="tb-conv">
+      <div class="tb-conv-head">
+        <div class="tb-avatar" id="tbAvatar">A</div>
+        <div>
+          <div class="tb-conv-title" id="tbTitle">Select a conversation</div>
+          <div id="tbSubtitle" class="subtitle"></div>
+        </div>
+        <div class="tb-status" id="tbStatusBtns" style="display:none">
+          <button data-status="Open">Open</button>
+          <button data-status="Pending">Pending</button>
+          <button data-status="Resolved">Resolved</button>
+        </div>
+      </div>
+
+      <div id="tbMessages" class="tb-messages" aria-live="polite"></div>
+
+      <div class="tb-compose">
+        <textarea id="tbInput" placeholder="Type a message… (Enter to send)"></textarea>
+        <button id="tbSend" class="tb-send" disabled>Send</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  // ==== Utilities ====
+  function $(id){ return document.getElementById(id); }
+  function setBadge(el, active){
+    el.textContent = active ? 'Active' : 'Inactive';
+    el.classList.toggle('ok', !!active);
+    el.classList.toggle('no', !active);
+  }
+  function toDataURL(file){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  function isValidIC(v){ return /^\d{12}$/.test(v || ''); }
+  function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v || ''); }
+
+  // ==== Load profile data from localStorage ====
+  function loadProfile(){
+    const data = {
+      fullName: localStorage.getItem('fullName') || localStorage.getItem('username') || 'User Name',
+      email: localStorage.getItem('email') || localStorage.getItem('useremail') || 'user@email.com',
+      phone: localStorage.getItem('phone') || '',
+      altPhone: localStorage.getItem('altPhone') || '',
+      address: localStorage.getItem('address') || '',
+      dob: localStorage.getItem('dob') || '',
+      gender: localStorage.getItem('gender') || '',
+      icNumber: localStorage.getItem('icNumber') || '',
+      icActive: localStorage.getItem('icActive') === 'true',
+      usernameHandle: localStorage.getItem('usernameHandle') || '',
+      userpic: localStorage.getItem('userpic') || 'default-profile.png',
+      userbanner: localStorage.getItem('userbanner') || 'default-banner.jpg',
+    };
+
+    $('displayName').textContent = data.fullName;
+    $('displayEmail').textContent = data.email;
+    $('bannerImg').src = data.userbanner;
+    $('profilePic').src = data.userpic;
+
+    $('displayIC').textContent = data.icNumber || 'Not set';
+    $('icActiveToggle').checked = data.icActive;
+    setBadge($('icStatus'), data.icActive);
+
+    return data;
+  }
+
+  function hydrateEditor(data){
+    $('fullName').value = data.fullName || '';
+    $('email').value = data.email || '';
+    $('phone').value = data.phone || '';
+    $('altPhone').value = data.altPhone || '';
+    $('address').value = data.address || '';
+    $('dob').value = data.dob || '';
+    $('gender').value = data.gender || '';
+    $('icNumber').value = data.icNumber || '';
+    $('icActive').checked = !!data.icActive;
+    setBadge($('icActiveText'), !!data.icActive);
+    $('usernameHandle').value = data.usernameHandle || '';
+    $('pfpPreview').src = data.userpic || 'default-profile.png';
+    $('bannerPreview').src = data.userbanner || 'default-banner.jpg';
+  }
+
+  function saveProfile(){
+    const newData = {
+      fullName: $('fullName').value.trim(),
+      email: $('email').value.trim(),
+      phone: $('phone').value.trim(),
+      altPhone: $('altPhone').value.trim(),
+      address: $('address').value.trim(),
+      dob: $('dob').value,
+      gender: $('gender').value,
+      icNumber: $('icNumber').value.trim(),
+      icActive: $('icActive').checked,
+      usernameHandle: $('usernameHandle').value.trim(),
+      userpic: $('pfpPreview').src,
+      userbanner: $('bannerPreview').src,
+    };
+
+    if(newData.email && !isValidEmail(newData.email)){
+      alert('Please enter a valid email address.'); return false;
+    }
+    if(newData.icNumber && !isValidIC(newData.icNumber)){
+      alert('IC Number must be exactly 12 digits.'); return false;
+    }
+    if(newData.icActive && !isValidIC(newData.icNumber)){
+      alert('Set a valid 12-digit IC Number before activating.');
+      $('icActive').checked = false; setBadge($('icActiveText'), false); return false;
+    }
+
+    Object.entries(newData).forEach(([k,v]) => localStorage.setItem(k, String(v)));
+    localStorage.setItem('username', newData.fullName);
+    localStorage.setItem('useremail', newData.email);
+
+    loadProfile();
+    return true;
+  }
+
+  // ==== Drawer controls (ONE trigger: button in card) ====
+  const drawer = $('editDrawer');
+  const openBtn = $('openEditorBtn');
+  const closeBtn = $('closeEditorBtn');
+  const cancelBtn = $('cancelBtn');
+  const saveBtn = $('saveBtn');
+
+  function openDrawer(){
+    const data = loadProfile();
+    hydrateEditor(data);
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden','false');
+    openBtn.setAttribute('aria-expanded','true');
+    setTimeout(() => $('fullName').focus(), 120);
+  }
+  function closeDrawer(){
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden','true');
+    openBtn.setAttribute('aria-expanded','false');
+  }
+
+  openBtn.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  cancelBtn.addEventListener('click', closeDrawer);
+  saveBtn.addEventListener('click', () => { if(saveProfile()) closeDrawer(); });
+
+  // ==== Tabs ====
+  document.querySelectorAll('.tablist [role="tab"]').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+  function switchTab(name){
+    document.querySelectorAll('.tablist [role="tab"]').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab===name)));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-'+name));
+  }
+
+  // ==== Images ====
+  $('pfpInput').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0]; if(!file) return;
+    const url = await toDataURL(file); $('pfpPreview').src = url;
+  });
+  $('bannerInput').addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0]; if(!file) return;
+    const url = await toDataURL(file); $('bannerPreview').src = url;
+  });
+
+  // ==== IC logic ====
+  function syncICStatus(active){
+    $('icActiveToggle').checked = !!active;
+    setBadge($('icStatus'), !!active);
+    $('icActive').checked = !!active;
+    setBadge($('icActiveText'), !!active);
+  }
+
+  $('icActive').addEventListener('change', () => {
+    const ic = $('icNumber').value.trim();
+    if($('icActive').checked && !/^\d{12}$/.test(ic)){
+      alert('Set a valid 12-digit IC Number before activating.');
+      $('icActive').checked = false; setBadge($('icActiveText'), false); return;
+    }
+    localStorage.setItem('icActive', String($('icActive').checked));
+    syncICStatus($('icActive').checked);
+  });
+
+  $('icNumber').addEventListener('input', (e) => {
+    const ok = /^\d{12}$/.test(e.target.value);
+    $('icHint').textContent = ok ? '✔ Format looks good.' : 'Enter 12 digits (e.g., 901010011234). Activation is available immediately.';
+  });
+
+  $('icActiveToggle').addEventListener('change', () => {
+    const icSaved = localStorage.getItem('icNumber') || '';
+    const wantActive = $('icActiveToggle').checked;
+    if(wantActive && !/^\d{12}$/.test(icSaved)){
+      alert('Please set your 12-digit IC Number first. Opening Identification panel...');
+      $('icActiveToggle').checked = false;
+      openDrawer(); switchTab('id'); $('icNumber').focus(); return;
+    }
+    localStorage.setItem('icActive', String(wantActive));
+    syncICStatus(wantActive);
+  });
+
+  // ==== Initial load ====
+  window.addEventListener('DOMContentLoaded', () => {
+    const data = loadProfile();
+    hydrateEditor(data);
+  });
+
+  // ==== Logout modal functions ====
+  function openLogoutModal(){ $('logoutModal').style.display='grid'; }
+  function closeLogoutModal(){ $('logoutModal').style.display='none'; }
+  function logout(){ window.location.href='index.html'; }
+
+  /* ====== CHAT WIDGET ====== */
+  const FAB = document.getElementById("tbFab");
+  const CHAT = document.getElementById("tbChat");
+  const BTN_MIN = document.getElementById("tbMin");
+  const BTN_CLOSE = document.getElementById("tbClose");
+  const TAB_CONTACT = document.getElementById("tabContact");
+  const TAB_TICKETS = document.getElementById("tabTickets");
+  const INPUT_SEARCH = document.getElementById("tbSearch");
+  const LIST = document.getElementById("tbList");
+  const MSGS = document.getElementById("tbMessages");
+  const INPUT = document.getElementById("tbInput");
+  const SEND = document.getElementById("tbSend");
+  const TITLE = document.getElementById("tbTitle");
+  const SUBTITLE = document.getElementById("tbSubtitle");
+  const STATUS_BTNS = document.getElementById("tbStatusBtns");
+
+  let currentTab = "contacts";
+  let selectedThread = null;
+
+  const CONTACT_ID = "contact-admin";
+  const CONTACT_KEY = "tb_contact_admin";
+
+  function openChat(){ CHAT.classList.add("open"); CHAT.setAttribute("aria-hidden","false"); }
+  function closeChat(){ CHAT.classList.remove("open"); CHAT.setAttribute("aria-hidden","true"); }
+
+  FAB.addEventListener("click", openChat);
+  BTN_MIN.addEventListener("click", closeChat);   // fixed
+  BTN_CLOSE.addEventListener("click", closeChat);
+
+  TAB_CONTACT.addEventListener("click", ()=>{ currentTab="contacts"; TAB_CONTACT.classList.add("active"); TAB_TICKETS.classList.remove("active"); renderList(); clearConversation(); });
+  TAB_TICKETS.addEventListener("click", ()=>{ currentTab="tickets"; TAB_TICKETS.classList.add("active"); TAB_CONTACT.classList.remove("active"); renderList(); clearConversation(); });
+  INPUT_SEARCH.addEventListener("input", renderList);
+
+  INPUT.addEventListener("input", ()=>{ SEND.disabled = !INPUT.value.trim(); });
+  INPUT.addEventListener("keydown", (e)=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); doSend(); }});
+  SEND.addEventListener("click", doSend);
+
+  STATUS_BTNS.addEventListener("click", (e)=>{
+    if(!selectedThread || selectedThread.type!=="ticket") return;
+    const btn = e.target.closest("button"); if(!btn) return;
+    const reports = JSON.parse(localStorage.getItem("reports")||"[]");
+    const idx = reports.findIndex(r=>r.ticketId===selectedThread.id);
+    if(idx>-1){ reports[idx].status = btn.dataset.status; localStorage.setItem("reports", JSON.stringify(reports)); }
+    renderStatusButtons(btn.dataset.status);
+    renderList();
+  });
+
+  function clearConversation(){
+    TITLE.textContent = "Select a conversation";
+    SUBTITLE.textContent = "";
+    MSGS.innerHTML = "";
+    STATUS_BTNS.style.display = "none";
+  }
+
+  function renderList(){
+    const q = (INPUT_SEARCH.value||"").trim().toLowerCase();
+    LIST.innerHTML = "";
+
+    if(currentTab==="contacts"){
+      const lastArr = JSON.parse(localStorage.getItem(CONTACT_KEY)||"[]");
+      const last = lastArr.slice(-1)[0]?.text || "Start a conversation";
+      const time = lastArr.slice(-1)[0]?.at || new Date().toISOString();
+
+      const item = document.createElement("div");
+      item.className = "tb-item" + (selectedThread?.id===CONTACT_ID ? " active":"");
+      item.innerHTML = `
+        <div class="tb-avatar">A</div>
+        <div class="tb-meta">
+          <div class="tb-line">
+            <div class="tb-name">Admin Support</div>
+            <div class="tb-time">${formatTime(time)}</div>
+          </div>
+          <div class="tb-last">${escapeHtml(last)}</div>
+        </div>`;
+      if("admin support".includes(q) || !q){
+        item.onclick = ()=> openThread({id:CONTACT_ID, type:"contact", name:"Admin Support"});
+        LIST.appendChild(item);
+      } else {
+        LIST.innerHTML = '<div class="tb-item"><div class="tb-meta">No results</div></div>';
+      }
+    } else {
+      const reports = JSON.parse(localStorage.getItem("reports")||"[]");
+      const filtered = reports.filter(r=>{
+        const hay = (r.ticketId+" "+r.item+" "+r.location+" "+r.status).toLowerCase();
+        return hay.includes(q);
+      }).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+
+      if(filtered.length===0){
+        LIST.innerHTML = '<div class="tb-item"><div class="tb-meta">No tickets yet</div></div>';
+      } else {
+        filtered.forEach(r=>{
+          const messages = JSON.parse(localStorage.getItem("tb_ticket_"+r.ticketId)||"[]");
+          const last = messages.slice(-1)[0]?.text || r.desc;
+          const time = messages.slice(-1)[0]?.at || r.createdAt;
+          const el = document.createElement("div");
+          el.className = "tb-item" + (selectedThread?.id===r.ticketId ? " active":"");
+          el.innerHTML = `
+            <div class="tb-avatar">T</div>
+            <div class="tb-meta">
+              <div class="tb-line">
+                <div class="tb-name">${r.ticketId}</div>
+                <div class="tb-time">${formatTime(time)}</div>
+              </div>
+              <div class="tb-last">${escapeHtml(r.item)} • <span class="tb-pill">${r.status}</span></div>
+            </div>`;
+          el.onclick = ()=> openThread({id:r.ticketId, type:"ticket", name:r.item, status:r.status});
+          LIST.appendChild(el);
+        });
+      }
+    }
+  }
+
+  function openThread(t){
+    selectedThread = t;
+    MSGS.innerHTML = "";
+    if(t.type==="contact"){
+      TITLE.textContent = "Admin Support";
+      SUBTITLE.textContent = "Direct messages";
+      STATUS_BTNS.style.display = "none";
+      renderMessages(CONTACT_KEY);
+    } else {
+      TITLE.textContent = t.id + " — " + (t.name||"Ticket");
+      SUBTITLE.textContent = "Ticket conversation";
+      STATUS_BTNS.style.display = "flex";
+      const reports = JSON.parse(localStorage.getItem("reports")||"[]");
+      const found = reports.find(r=>r.ticketId===t.id);
+      renderStatusButtons(found?.status||"Open");
+      renderMessages("tb_ticket_"+t.id);
+    }
+  }
+
+  function renderStatusButtons(active){
+    Array.from(STATUS_BTNS.querySelectorAll("button")).forEach(b=>{
+      b.classList.toggle("active", b.dataset.status===active);
+    });
+  }
+
+  function renderMessages(storageKey){
+    const arr = JSON.parse(localStorage.getItem(storageKey)||"[]");
+    arr.forEach(m=> appendBubble(m.sender, m.text, m.at));
+    MSGS.scrollTop = MSGS.scrollHeight + 5000;
+  }
+
+  function appendBubble(sender, text, at){
+    const div = document.createElement("div");
+    div.className = "tb-bubble " + (sender==="me" ? "me":"them");
+    div.innerHTML = `${escapeHtml(text)}<time>${formatTime(at)}</time>`;
+    MSGS.appendChild(div);
+  }
+
+  function doSend(){
+    if(!selectedThread) return;
+    const text = INPUT.value.trim(); if(!text) return;
+    const at = new Date().toISOString();
+    const key = selectedThread.type==="contact" ? CONTACT_KEY : ("tb_ticket_"+selectedThread.id);
+    const arr = JSON.parse(localStorage.getItem(key)||"[]");
+    arr.push({sender:"me", text, at});
+    localStorage.setItem(key, JSON.stringify(arr));
+    appendBubble("me", text, at);
+    INPUT.value=""; SEND.disabled = true;
+    renderList();
+  }
+
+  function formatTime(iso){
+    try{const d=new Date(iso);return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});}catch{return "";}
+  }
+  function escapeHtml(s){ return (s||"").replace(/[&<>'"]/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;" }[m])); }
+
+  // boot chat list
+  renderList();
+</script>
+
+</body>
+</html>

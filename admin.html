@@ -1,0 +1,408 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User - TraceBack</title>
+  <style>
+    :root{
+      --tb-primary:#1b6dc1; --tb-dark:#1b263b; --tb-muted:#6b7280; --tb-bg:#f5f9fc;
+    }
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f9fc; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #f0f4f8; border-bottom: 2px solid #ccc; }
+    .logo img { height: 75px; }
+    nav { flex: 1; text-align: center; }
+    nav a { text-decoration: none; margin: 0 10px; padding: 8px 18px; background: #eaeaea; border-radius: 8px; font-weight: bold; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.3s; }
+    nav a:hover { background: #dcdcdc; }
+    .logout-btn { background: #ccc; padding: 8px 16px; border-radius: 8px; text-decoration: none; color: #333; font-weight: bold; cursor: pointer; }
+    .hero { position: relative; }
+    .hero img { width: 100%; display: block; }
+    .hero-text { position: absolute; top: 40%; left: 5%; color: white; text-shadow: 2px 2px 5px rgba(0,0,0,0.7); }
+    .hero-text h1 { margin: 0; font-size: 40px; font-weight: bold; }
+    .content { padding: 40px; background: #eef4f8; }
+    .content h2 { color: #1b263b; font-size: 26px; }
+    .content p { color: #333; max-width: 900px; line-height: 1.6; }
+
+    /* Logout Modal */
+    .logout-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+    .logout-modal-content { background: #f9fcff; padding: 25px; border-radius: 10px; width: 320px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .logout-buttons { display: flex; justify-content: space-around; }
+    .logout-buttons button { padding: 10px 25px; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; font-weight: bold; }
+    .btn-no { background: #fff; border: 1px solid #ccc; color: #333; }
+    .btn-no:hover { background: #f0f0f0; }
+    .btn-yes { background: #1b6dc1; color: white; }
+    .btn-yes:hover { background: #155a99; }
+
+    /* ===== CHAT WIDGET (Admin → User) ===== */
+    .tb-fab{
+      position: fixed; right: 22px; bottom: 22px; z-index: 1200;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--tb-primary); color:#fff; border:none; box-shadow:0 10px 24px rgba(27,109,193,.35);
+      display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;
+    }
+    .tb-fab:active{ transform: translateY(1px); }
+    .tb-window{
+      position: fixed; right: 22px; bottom: 22px; z-index: 1201;
+      width: 920px; max-width: 96vw; height: 560px; max-height: 78vh;
+      background:#fff; border:1px solid #e5e7eb; border-radius: 14px; overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0,0,0,.2); display: none;
+    }
+    .tb-window.open{ display:block; }
+    .tb-head{
+      height:56px; background: linear-gradient(90deg,#f8fafc,#eef2ff);
+      border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; padding:0 12px 0 14px;
+    }
+    .tb-head .brand{display:flex; gap:10px; align-items:center;}
+    .tb-head .logo{width:30px;height:30px;border-radius:8px;background:var(--tb-dark);color:#fff;display:grid;place-items:center;font-weight:700}
+    .tb-head .title{font-weight:600;font-size:14px}
+    .tb-head .subtitle{font-size:11px;color:var(--tb-muted)}
+    .tb-head .actions button{background:#fff;border:1px solid #e5e7eb;color:#333;border-radius:8px;padding:6px 8px;margin-left:6px;cursor:pointer}
+    .tb-head .actions button:hover{background:#f3f4f6}
+    .tb-body{display:grid; grid-template-columns: 320px 1fr; height: calc(100% - 56px);}
+    .tb-side{border-right:1px solid #e5e7eb; display:flex; flex-direction:column}
+    .tb-tabs{padding:10px}
+    .tb-tab-wrap{display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#f3f4f6; border-radius:12px; padding:6px}
+    .tb-tabs .tab{width:50%; padding:10px 0; border-radius:10px; font-weight:600; font-size:13px; cursor:pointer; border:1px solid #e5e7eb; background:#fff}
+    .tb-tabs .tab.active{background:#fff;color:#111; box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.05); border-color:#d1d5db}
+    .tb-search{padding:0 12px 10px}
+    .tb-search input{width:100%; padding:9px 12px; border:1px solid #e5e7eb; border-radius:10px; font-size:13px}
+    .tb-list{overflow:auto}
+    .tb-item{display:flex; gap:10px; padding:10px 12px; border-top:1px solid #f1f5f9; cursor:pointer;}
+    .tb-item:hover{background:#f8fafc}
+    .tb-item.active{background:#eef2ff}
+    .tb-avatar{width:42px;height:42px;border-radius:999px;background:#e5e7eb;display:grid;place-items:center;font-weight:700}
+    .tb-meta{flex:1; min-width:0}
+    .tb-line{display:flex; align-items:center; justify-content:space-between; gap:8px}
+    .tb-name{font-weight:600; font-size:14px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+    .tb-time{font-size:11px;color:var(--tb-muted)}
+    .tb-last{font-size:12px;color:var(--tb-muted); overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+    .tb-pill{font-size:10px; border:1px solid #e5e7eb; padding:2px 6px; border-radius:999px; color:#374151}
+    .tb-conv{display:flex; flex-direction:column;}
+    .tb-conv-head{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #e5e7eb}
+    .tb-conv-title{font-weight:700}
+    .tb-status{margin-left:auto; display:flex; gap:6px}
+    .tb-status button{font-size:11px; padding:4px 8px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; cursor:pointer}
+    .tb-status button.active{background:var(--tb-primary); color:#fff; border-color:var(--tb-primary)}
+    .tb-messages{flex:1; overflow:auto; background:linear-gradient(#fff,#f8fafc); padding:16px}
+    .tb-bubble{max-width:72%; padding:10px 12px; border-radius:14px; margin:6px 0; font-size:14px; line-height:1.35; box-shadow:0 1px 2px rgba(0,0,0,.05);}
+    .tb-bubble.me{margin-left:auto; background:var(--tb-primary); color:#fff; border-bottom-right-radius:4px}
+    .tb-bubble.them{margin-right:auto; background:#eef2ff; color:#111; border-bottom-left-radius:4px}
+    .tb-bubble time{display:block; font-size:10px; opacity:.8; margin-top:4px}
+    .tb-compose{border-top:1px solid #e5e7eb; padding:10px; display:flex; gap:10px}
+    .tb-compose textarea{flex:1; resize:none; min-height:38px; max-height:110px; border:1px solid #e5e7eb; border-radius:10px; padding:9px 10px; font-size:14px}
+    .tb-send{background:var(--tb-primary); color:#fff; padding:10px 16px; border-radius:10px; font-weight:700}
+    .tb-send:disabled{background:#9bbde2}
+    @media (max-width: 700px){
+      .tb-body{grid-template-columns:1fr;}
+      .tb-side{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><img src="TRACEBACK.png" alt="TraceBack Logo"></div>
+  <nav>
+    <a href="add.html">Add Item</a>
+    <a href="record.html">Reports</a>
+    <a href="camera.html">View Camera</a>
+  </nav>
+  <a href="#" class="logout-btn" onclick="openLogoutModal()">Log Out</a>
+</header>
+
+<div class="hero">
+  <img src="MRT3.jpg" alt="MRT Image">
+  <div class="hero-text">
+    <h1>WELCOME TO</h1>
+    <h1>TRACEBACK!</h1>
+  </div>
+</div>
+
+<div class="content">
+  <h2>WHAT IS TRACEBACK?</h2>
+  <p>
+    TraceBack introduces a digital Lost & Found System to ease the process. It allows users to search for lost
+    items and administrators to store and manage item details like date found, location, and characteristics.
+    By automating the process, the system improves efficiency, increases recovery rates, and enhances user
+    satisfaction, making it a practical solution for organizations and public spaces.
+  </p>
+</div>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="logout-modal">
+  <div class="logout-modal-content">
+    <p>Are you sure you want to Logout?</p>
+    <div class="logout-buttons">
+      <button class="btn-no" onclick="closeLogoutModal()">No</button>
+      <button class="btn-yes" onclick="logout()">Yes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==== CHAT (Admin → User) ==== -->
+<button id="tbFab" class="tb-fab" title="Open inbox">💬</button>
+
+<div id="tbChat" class="tb-window" aria-hidden="true">
+  <div class="tb-head">
+    <div class="brand">
+      <div class="logo">TB</div>
+      <div>
+        <div class="title">Inbox</div>
+        <div class="subtitle">Customers & Tickets</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="tbMin">–</button>
+      <button id="tbClose">✕</button>
+    </div>
+  </div>
+
+  <div class="tb-body">
+    <aside class="tb-side">
+      <div class="tb-tabs">
+        <div class="tb-tab-wrap">
+          <button id="tabContact" class="tab active">Contact</button>
+          <button id="tabTickets" class="tab">Tickets</button>
+        </div>
+      </div>
+      <div class="tb-search"><input id="tbSearch" placeholder="Search…" /></div>
+      <div id="tbList" class="tb-list" role="listbox" aria-label="Threads"></div>
+    </aside>
+
+    <section class="tb-conv">
+      <div class="tb-conv-head">
+        <div class="tb-avatar" id="tbAvatar">U</div>
+        <div>
+          <div class="tb-conv-title" id="tbTitle">Select a conversation</div>
+          <div id="tbSubtitle" class="subtitle"></div>
+        </div>
+        <div class="tb-status" id="tbStatusBtns" style="display:none">
+          <button data-status="Open">Open</button>
+          <button data-status="Pending">Pending</button>
+          <button data-status="Resolved">Resolved</button>
+        </div>
+      </div>
+
+      <div id="tbMessages" class="tb-messages" aria-live="polite"></div>
+
+      <div class="tb-compose">
+        <textarea id="tbInput" placeholder="Type a message… (Enter to send)"></textarea>
+        <button id="tbSend" class="tb-send" disabled>Send</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  // ===== Page logout modal =====
+  function openLogoutModal() { document.getElementById("logoutModal").style.display = "flex"; }
+  function closeLogoutModal() { document.getElementById("logoutModal").style.display = "none"; }
+  function logout() { window.location.href = "index.html"; }
+
+  // ===== Inbox (shared storage with other pages) =====
+  const IS_ADMIN = true; // IMPORTANT: this page acts as admin
+
+  const FAB = document.getElementById("tbFab");
+  const CHAT = document.getElementById("tbChat");
+  const BTN_MIN = document.getElementById("tbMin");
+  const BTN_CLOSE = document.getElementById("tbClose");
+  const TAB_CONTACT = document.getElementById("tabContact");
+  const TAB_TICKETS = document.getElementById("tabTickets");
+  const INPUT_SEARCH = document.getElementById("tbSearch");
+  const LIST = document.getElementById("tbList");
+  const MSGS = document.getElementById("tbMessages");
+  const INPUT = document.getElementById("tbInput");
+  const SEND = document.getElementById("tbSend");
+  const TITLE = document.getElementById("tbTitle");
+  const SUBTITLE = document.getElementById("tbSubtitle");
+  const STATUS_BTNS = document.getElementById("tbStatusBtns");
+
+  const CONTACT_ID = "contact-admin";
+  const CONTACT_KEY = "tb_contact_admin";
+
+  let currentTab = "contact"; // 'contact' | 'tickets'
+  let selectedThread = null;  // {id, type}
+
+  // Open/close
+  function openChat(){ CHAT.classList.add("open"); CHAT.setAttribute("aria-hidden","false"); }
+  function closeChat(){ CHAT.classList.remove("open"); CHAT.setAttribute("aria-hidden","true"); }
+  FAB.addEventListener("click", openChat);
+  BTN_MIN.addEventListener("click", closeChat);
+  BTN_CLOSE.addEventListener("click", closeChat);
+
+  // Tabs
+  TAB_CONTACT.addEventListener("click", ()=>{ currentTab="contact"; TAB_CONTACT.classList.add("active"); TAB_TICKETS.classList.remove("active"); renderList(); clearConversation(); });
+  TAB_TICKETS.addEventListener("click", ()=>{ currentTab="tickets"; TAB_TICKETS.classList.add("active"); TAB_CONTACT.classList.remove("active"); renderList(); clearConversation(); });
+
+  // Compose
+  INPUT.addEventListener("input", ()=>{ SEND.disabled = !INPUT.value.trim(); });
+  INPUT.addEventListener("keydown", (e)=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); doSend(); }});
+  SEND.addEventListener("click", doSend);
+
+  // Status buttons
+  STATUS_BTNS.addEventListener("click", (e)=>{
+    if(!selectedThread || selectedThread.type!=="ticket") return;
+    const btn = e.target.closest("button"); if(!btn) return;
+    const reports = JSON.parse(localStorage.getItem("reports")||"[]");
+    const idx = reports.findIndex(r=>r.ticketId===selectedThread.id);
+    if(idx>-1){ reports[idx].status = btn.dataset.status; localStorage.setItem("reports", JSON.stringify(reports)); }
+    renderStatusButtons(btn.dataset.status);
+    renderList();
+  });
+
+  // Search
+  INPUT_SEARCH.addEventListener("input", renderList);
+
+  // Helpers
+  function clearConversation(){
+    TITLE.textContent = "Select a conversation";
+    SUBTITLE.textContent = "";
+    MSGS.innerHTML = "";
+    STATUS_BTNS.style.display = "none";
+  }
+  function escapeHtml(s){ return (s||"").replace(/[&<>'"]/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;" }[m])); }
+  function fmtTime(iso){ try{const d=new Date(iso);return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});}catch{return "";} }
+
+  function renderList(){
+    const q = INPUT_SEARCH.value.trim().toLowerCase();
+    LIST.innerHTML = "";
+
+    if(currentTab==="contact"){
+      const lastArr = JSON.parse(localStorage.getItem(CONTACT_KEY)||"[]");
+      const last = lastArr.slice(-1)[0]?.text || "Start a conversation";
+      const time = lastArr.slice(-1)[0]?.at || new Date().toISOString();
+
+      const el = document.createElement("div");
+      el.className = "tb-item" + (selectedThread?.id===CONTACT_ID ? " active":"");
+      el.innerHTML = `
+        <div class="tb-avatar">U</div>
+        <div class="tb-meta">
+          <div class="tb-line">
+            <div class="tb-name">Customer DM</div>
+            <div class="tb-time">${fmtTime(time)}</div>
+          </div>
+            <div class="tb-last">${escapeHtml(last)}</div>
+        </div>`;
+      if(!q || "customer dm".includes(q)){
+        el.onclick = ()=> openThread({id:CONTACT_ID, type:"contact"});
+        LIST.appendChild(el);
+      }else{
+        LIST.innerHTML = '<div class="tb-item"><div class="tb-meta">No results</div></div>';
+      }
+    } else {
+      const reports = JSON.parse(localStorage.getItem("reports")||"[]");
+      const filtered = reports.filter(r=>{
+        const hay = (r.ticketId+" "+r.item+" "+r.location+" "+r.status).toLowerCase();
+        return hay.includes(q);
+      }).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+
+      if(filtered.length===0){
+        LIST.innerHTML = '<div class="tb-item"><div class="tb-meta">No tickets yet</div></div>';
+      } else {
+        filtered.forEach(r=>{
+          const messages = JSON.parse(localStorage.getItem("tb_ticket_"+r.ticketId)||"[]");
+          const last = messages.slice(-1)[0]?.text || r.desc;
+          const time = messages.slice(-1)[0]?.at || r.createdAt;
+
+          const row = document.createElement("div");
+          row.className = "tb-item" + (selectedThread?.id===r.ticketId ? " active":"");
+          row.innerHTML = `
+            <div class="tb-avatar">T</div>
+            <div class="tb-meta">
+              <div class="tb-line">
+                <div class="tb-name">${r.ticketId}</div>
+                <div class="tb-time">${fmtTime(time)}</div>
+              </div>
+              <div class="tb-last">${escapeHtml(r.item)} • <span class="tb-pill">${r.status}</span></div>
+            </div>`;
+          row.onclick = ()=> openThread({id:r.ticketId, type:"ticket"});
+          LIST.appendChild(row);
+        });
+      }
+    }
+  }
+
+  function openThread(t){
+    selectedThread = t;
+    MSGS.innerHTML = "";
+    if(t.type==="contact"){
+      TITLE.textContent = "Customer DM";
+      SUBTITLE.textContent = "Direct messages with user";
+      STATUS_BTNS.style.display = "none";
+      renderMessages(CONTACT_KEY);
+    } else {
+      TITLE.textContent = t.id + " — Ticket";
+      SUBTITLE.textContent = "Ticket conversation";
+      STATUS_BTNS.style.display = "flex";
+      // set active status
+      const reports = JSON.parse(localStorage.getItem("reports")||"[]");
+      const found = reports.find(r=>r.ticketId===t.id);
+      renderStatusButtons(found?.status || "Open");
+      renderMessages("tb_ticket_"+t.id);
+    }
+    setTimeout(()=>INPUT.focus(),0);
+  }
+
+  function renderStatusButtons(active){
+    Array.from(STATUS_BTNS.querySelectorAll("button")).forEach(b=>{
+      b.classList.toggle("active", b.dataset.status===active);
+    });
+  }
+
+  // IMPORTANT: Map stored sender to visual side depending on viewer (admin vs user)
+  function bubbleClassFor(storedSender){
+    // Back-compat: storedSender can be 'me'/'them' (old), or we might only have by:'admin'/'user'
+    if(IS_ADMIN){
+      // On admin page, admin-sent messages are stored as 'them' → show as 'me' here.
+      return storedSender === 'them' ? 'me' : 'them';
+    }else{
+      return storedSender === 'me' ? 'me' : 'them';
+    }
+  }
+
+  function renderMessages(key){
+    const arr = JSON.parse(localStorage.getItem(key)||"[]");
+    arr.forEach(m=>{
+      // derive sender fallback if old/new formats mix
+      const storedSender = m.sender ?? (m.by === 'admin' ? 'them' : 'me');
+      appendBubble(bubbleClassFor(storedSender), m.text, m.at);
+    });
+    MSGS.scrollTop = MSGS.scrollHeight + 9999;
+  }
+
+  function appendBubble(side, text, at){
+    const div = document.createElement("div");
+    div.className = "tb-bubble " + (side === 'me' ? 'me' : 'them');
+    div.innerHTML = `${escapeHtml(text)}<time>${fmtTime(at)}</time>`;
+    MSGS.appendChild(div);
+  }
+
+  function doSend(){
+    if(!selectedThread) return;
+    const text = INPUT.value.trim(); if(!text) return;
+    const at = new Date().toISOString();
+    const key = selectedThread.type==="contact" ? CONTACT_KEY : ("tb_ticket_"+selectedThread.id);
+    const arr = JSON.parse(localStorage.getItem(key)||"[]");
+
+    // Store so it appears as FROM ADMIN on user pages
+    const stored = { sender: "them", by: "admin", text, at };
+    arr.push(stored);
+    localStorage.setItem(key, JSON.stringify(arr));
+
+    // Render on admin page as your own (right side)
+    appendBubble('me', text, at);
+    INPUT.value = ""; SEND.disabled = true;
+    renderList();
+  }
+
+  // Boot
+  renderList();
+
+  // Confirm exit on browser close/refresh
+  window.addEventListener("beforeunload", function (e) {
+    e.preventDefault();
+    e.returnValue = "";
+  });
+</script>
+
+</body>
+</html>
