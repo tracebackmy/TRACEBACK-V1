@@ -86,6 +86,9 @@
       padding: 15px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       transition: transform 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
     .item-card:hover { transform: translateY(-5px); }
     .item-card h4 {
@@ -97,19 +100,37 @@
     .item-card small {
       display: block;
       color: #777;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
     .item-img {
       width: 100%;
       height: 120px;
       background: #eee;
       border-radius: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+      background-size: cover;
+      background-position: center;
     }
     .item-desc {
       font-size: 14px;
       color: #555;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
+      min-height: 40px;
+    }
+    .meta {
+      font-size: 12px;
+      color: #666;
+      display: grid;
+      gap: 4px;
+    }
+    .status-pill {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      margin-top: 4px;
     }
     .contact-btn {
       display: block;
@@ -121,6 +142,7 @@
       border-radius: 8px;
       font-weight: bold;
       transition: 0.3s;
+      margin-top: 6px;
     }
     .contact-btn:hover { background: #473bb3; }
 
@@ -130,6 +152,22 @@
       color: #666;
       margin: 30px 0;
       display: none;
+    }
+
+    /* Toast for "new item added" */
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 16px;
+      background: #1b6dc1;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+      font-weight: 600;
+      display: none;
+      z-index: 1000;
     }
 
     /* ====== CHAT WIDGET (user → admin) ====== */
@@ -229,45 +267,16 @@
 
   <!-- Search Bar -->
   <div class="search-bar">
-    <input id="searchInput" type="text" placeholder="Search by name or description">
+    <input id="searchInput" type="text" placeholder="Search by item, description, ticket ID, location, or email">
   </div>
 
-  <!-- Item Cards -->
-  <div class="items" id="items">
-    <div class="item-card">
-      <h4 class="item-name">Black Wallet</h4>
-      <small class="item-date">2025-09-01</small>
-      <div class="item-img" style="background-image:url('wallet.jpg'); background-size:cover; background-position:center;"></div>
-      <p class="item-desc">Leather wallet found near KL Sentral entrance.</p>
-      <a href="customer.html" class="contact-btn">Contact</a>
-    </div>
-
-    <div class="item-card">
-      <h4 class="item-name">Red Umbrella</h4>
-      <small class="item-date">2025-08-27</small>
-      <div class="item-img" style="background-image:url('umbrella.jpg'); background-size:cover; background-position:center;"></div>
-      <p class="item-desc">Left on the MRT Kajang Line (Bukit Bintang).</p>
-      <a href="customer.html" class="contact-btn">Contact</a>
-    </div>
-
-    <div class="item-card">
-      <h4 class="item-name">Samsung Phone</h4>
-      <small class="item-date">2025-08-30</small>
-      <div class="item-img" style="background-image:url('phone.jpg'); background-size:cover; background-position:center;"></div>
-      <p class="item-desc">Found at Titiwangsa interchange platform.</p>
-      <a href="customer.html" class="contact-btn">Contact</a>
-    </div>
-
-    <div class="item-card">
-      <h4 class="item-name">Blue Backpack</h4>
-      <small class="item-date">2025-09-05</small>
-      <div class="item-img" style="background-image:url('backpack.jpg'); background-size:cover; background-position:center;"></div>
-      <p class="item-desc">Turned in at Pasar Seni station help desk.</p>
-      <a href="customer.html" class="contact-btn">Contact</a>
-    </div>
-  </div>
+  <!-- Item Cards (dynamic) -->
+  <div class="items" id="items"></div>
 
   <div id="emptyState" class="empty">No matching items found.</div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
   <!-- ====== CHAT WIDGET UI ====== -->
   <button id="tbFab" class="tb-fab" title="Chat with staff">💬</button>
@@ -324,31 +333,97 @@
   </div>
 
   <script>
-    /* ===== Search filter ===== */
+    /* ================== SEARCH & RENDER ================== */
     const input = document.getElementById('searchInput');
     const itemsContainer = document.getElementById('items');
-    const cards = Array.from(itemsContainer.getElementsByClassName('item-card'));
     const emptyState = document.getElementById('emptyState');
+    const toast = document.getElementById('toast');
 
-    function filterCards(query) {
-      const q = query.trim().toLowerCase();
-      let anyVisible = false;
-
-      cards.forEach(card => {
-        const name = card.querySelector('.item-name').textContent.toLowerCase();
-        const desc = card.querySelector('.item-desc').textContent.toLowerCase();
-        const match = !q || name.includes(q) || desc.includes(q);
-        card.style.display = match ? '' : 'none';
-        if (match) anyVisible = true;
-      });
-
-      emptyState.style.display = anyVisible ? 'none' : 'block';
+    function getReports(){
+      try { return JSON.parse(localStorage.getItem("reports") || "[]"); }
+      catch { return []; }
     }
 
-    input.addEventListener('input', (e) => filterCards(e.target.value));
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); });
+    function formatDate(d){
+      if(!d) return "";
+      try { return new Date(d).toISOString().slice(0,10); } catch { return d; }
+    }
 
-    /* ===== CHAT WIDGET (scoped vars) ===== */
+    function escapeHtml(s){ return (s||"").replace(/[&<>'"]/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;" }[m])); }
+
+    function buildCard(r){
+      const div = document.createElement('div');
+      div.className = 'item-card';
+
+      const photo = r.photo ? `background-image:url('${r.photo}');` : 'background-image:linear-gradient(135deg,#e5e7eb,#f3f4f6);';
+
+      div.innerHTML = `
+        <h4 class="item-name">${escapeHtml(r.item)}</h4>
+        <small class="item-date">${formatDate(r.date)}</small>
+        <div class="item-img" style="${photo}"></div>
+        <p class="item-desc">${escapeHtml(r.desc)}</p>
+        <div class="meta">
+          <div><strong>Station:</strong> ${escapeHtml(r.location || "-")}</div>
+          <div><strong>Ticket:</strong> ${escapeHtml(r.ticketId)}</div>
+          <div><strong>By:</strong> ${escapeHtml(r.name)} (${escapeHtml(r.email)})</div>
+          <span class="status-pill">${escapeHtml(r.status || "Open")}</span>
+        </div>
+        <a href="#" class="contact-btn" data-ticket="${escapeHtml(r.ticketId)}" data-name="${escapeHtml(r.item)}" data-date="${escapeHtml(r.date)}" data-desc="${escapeHtml(r.desc)}">Contact</a>
+      `;
+      return div;
+    }
+
+    function renderList(){
+      const q = (input.value || "").trim().toLowerCase();
+      const reports = getReports().sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+      itemsContainer.innerHTML = "";
+
+      const filtered = reports.filter(r=>{
+        const hay = (r.item+" "+r.desc+" "+r.ticketId+" "+r.location+" "+r.email).toLowerCase();
+        return !q || hay.includes(q);
+      });
+
+      if(filtered.length === 0){
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      filtered.forEach(r => itemsContainer.appendChild(buildCard(r)));
+
+      // bind Contact buttons for the newly rendered cards
+      hookContactButtons();
+    }
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(()=> toast.style.display = 'none', 2600);
+    }
+
+    // Search events
+    input.addEventListener('input', renderList);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+
+    // Auto-refresh when localStorage changes (e.g., report added in another tab)
+    window.addEventListener('storage', (e)=>{
+      if(e.key === 'reports') renderList();
+    });
+
+    // Show toast if redirected with ?new=TKT-xxxxxx
+    (function handleQueryToast(){
+      const params = new URLSearchParams(location.search);
+      const id = params.get('new');
+      if(id){
+        showToast(`Report submitted! (Ticket: ${id})`);
+        // clean the URL (no reload)
+        params.delete('new');
+        const url = location.pathname + (params.toString() ? "?"+params.toString() : "");
+        history.replaceState({}, "", url);
+      }
+    })();
+
+    /* ================== CHAT WIDGET (scoped vars) ================== */
     const TB_FAB = document.getElementById("tbFab");
     const TB_CHAT = document.getElementById("tbChat");
     const TB_BTN_MIN = document.getElementById("tbMin");
@@ -477,7 +552,6 @@
         TB_renderStatusButtons(found?.status||"Open");
         TB_renderMessages("tb_ticket_"+t.id);
       }
-      // focus composer for quick reply
       setTimeout(()=>TB_INPUT.focus(), 0);
     }
 
@@ -519,29 +593,29 @@
     function TB_escape(s){ return (s||"").replace(/[&<>'"]/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;" }[m])); }
 
     // Hook "Contact" buttons to open chat with prefilled message
-    document.querySelectorAll('.contact-btn').forEach(btn=>{
-      btn.addEventListener('click', (e)=>{
-        e.preventDefault(); // keep user on this page, open chat
-        const card = btn.closest('.item-card');
-        const name = card.querySelector('.item-name')?.textContent.trim() || 'Item';
-        const date = card.querySelector('.item-date')?.textContent.trim() || '';
-        const desc = card.querySelector('.item-desc')?.textContent.trim() || '';
-        const msg = `Hi, I’d like to ask about "${name}" (${date}). Details: ${desc}`;
+    function hookContactButtons(){
+      document.querySelectorAll('.contact-btn').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          e.preventDefault();
+          const card = btn.closest('.item-card');
+          const name = card.querySelector('.item-name')?.textContent.trim() || 'Item';
+          const date = card.querySelector('.item-date')?.textContent.trim() || '';
+          const desc = card.querySelector('.item-desc')?.textContent.trim() || '';
+          const msg = `Hi, I’d like to ask about "${name}" (${date}). Details: ${desc}`;
 
-        // Open chat → Contact Staff thread
-        TB_openChat();
-        TB_TAB_CONTACT.click(); // ensure we're on Contacts tab
-        TB_openThread({id:TB_CONTACT_ID, type:"contact", name:"Admin Support"});
+          TB_openChat();
+          TB_TAB_CONTACT.click();
+          TB_openThread({id:TB_CONTACT_ID, type:"contact", name:"Admin Support"});
 
-        // Prefill composer (user can edit, not sent automatically)
-        TB_INPUT.value = msg;
-        TB_SEND.disabled = !TB_INPUT.value.trim();
-        TB_INPUT.focus();
+          TB_INPUT.value = msg;
+          TB_SEND.disabled = !TB_INPUT.value.trim();
+          TB_INPUT.focus();
+        });
       });
-    });
+    }
 
-    // boot chat list on load
-    TB_renderList();
+    // Initial render
+    renderList();
   </script>
 
 </body>
