@@ -24,91 +24,72 @@
     .found-btn { background: #4caf50; color: white; }
     .claim-btn { background: #1b6dc1; color: white; margin-left: 6px; }
 
-    /* ===== Unified Chat Widget (Admin view) ===== */
+    /* ===== Chat Widget ===== */
     .tb-fab{
       position: fixed; right: 22px; bottom: 22px; z-index: 1200;
       width: 56px; height: 56px; border-radius: 50%;
       background: var(--tb-primary); color:#fff; border:none; box-shadow:0 10px 24px rgba(27,109,193,.35);
       display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer;
     }
-    .tb-fab:active{ transform: translateY(1px); }
     .tb-window{
       position: fixed; right: 22px; bottom: 22px; z-index: 1201;
       width: 920px; max-width: 96vw; height: 560px; max-height: 78vh;
-      background:#fff; border:1px solid #e5e7eb; border-radius: 14px; overflow: hidden;
+      background:#fff; border:1px solid #e5e7eb; border-radius: 14px;
       box-shadow: 0 15px 40px rgba(0,0,0,.2); display: none;
     }
     .tb-window.open{ display:block; }
-
     .tb-head{
-      height:56px; background: linear-gradient(90deg,#f8fafc,#eef2ff);
-      border-bottom:1px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; padding:0 12px 0 14px;
+      height:56px;
+      background: linear-gradient(90deg, #f8fafc, #eef2ff);
+      border-bottom:1px solid #e5e7eb;
+      display:flex; align-items:center; justify-content:space-between; padding:0 12px 0 14px;
     }
-    .tb-head .brand{display:flex; gap:10px; align-items:center;}
-    .tb-head .logo{width:30px;height:30px;border-radius:8px;background:var(--tb-dark);color:#fff;display:grid;place-items:center;font-weight:700}
-    .tb-head .title{font-weight:600;font-size:14px}
-    .tb-head .subtitle{font-size:11px;color:var(--tb-muted)}
-    .tb-head .actions button{background:#fff;border:1px solid #e5e7eb;color:#333;border-radius:8px;padding:6px 8px;margin-left:6px;cursor:pointer}
-    .tb-head .actions button:hover{background:#f3f4f6}
-
+    .tb-head .logo{width:30px;height:30px;border-radius:8px;background:var(--tb-dark);color:#fff;display:grid;place-items:center;font-weight:700;}
+    .tb-head .title{font-weight:600;font-size:14px;}
+    .tb-head .subtitle{font-size:11px;color:var(--tb-muted);}
+    .tb-head .actions button{background:#fff;border:1px solid #e5e7eb;color:#333;border-radius:8px;padding:6px 8px;margin-left:6px;cursor:pointer;}
     .tb-body{display:grid; grid-template-columns: 320px 1fr; height: calc(100% - 56px);}
-    .tb-side{border-right:1px solid #e5e7eb; display:flex; flex-direction:column}
-    .tb-tabs{padding:10px}
-    .tb-tab-wrap{display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#f3f4f6; border-radius:12px; padding:6px}
-    .tb-tabs .tab{width:50%; padding:10px 0; border-radius:10px; font-weight:600; font-size:13px; cursor:pointer; border:1px solid #e5e7eb; background:#fff}
-    .tb-tabs .tab.active{background:#fff;color:#111; box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.05); border-color:#d1d5db}
-    .tb-search{padding:0 12px 10px}
-    .tb-search input{width:100%; padding:9px 12px; border:1px solid #e5e7eb; border-radius:10px; font-size:13px}
-    .tb-list{overflow:auto}
+    .tb-side{border-right:1px solid #e5e7eb; display:flex; flex-direction:column;}
+    .tb-tabs{padding:10px;}
+    .tb-tab-wrap{display:grid; grid-template-columns:1fr 1fr; gap:8px; background:#f3f4f6; border-radius:12px; padding:6px;}
+    .tb-tabs .tab{width:50%; padding:10px 0; border-radius:10px; font-weight:600; font-size:13px; cursor:pointer; border:1px solid #e5e7eb; background:#fff;}
+    .tb-tabs .tab.active{background:#fff;color:#111; box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.05); border-color:#d1d5db;}
+    .tb-search{padding:0 12px 10px;}
+    .tb-search input{width:100%; padding:9px 12px; border:1px solid #e5e7eb; border-radius:10px; font-size:13px;}
+    .tb-list{overflow:auto;}
     .tb-item{display:flex; gap:10px; padding:10px 12px; border-top:1px solid #f1f5f9; cursor:pointer;}
-    .tb-item:hover{background:#f8fafc}
-    .tb-item.active{background:#eef2ff}
-    .tb-avatar{width:42px;height:42px;border-radius:999px;background:#e5e7eb;display:grid;place-items:center;font-weight:700}
-    .tb-meta{flex:1; min-width:0}
-    .tb-line{display:flex; align-items:center; justify-content:space-between; gap:8px}
-    .tb-name{font-weight:600; font-size:14px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
-    .tb-time{font-size:11px;color:var(--tb-muted)}
-    .tb-last{font-size:12px;color:var(--tb-muted); overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
-    .tb-pill{font-size:10px; border:1px solid #e5e7eb; padding:2px 6px; border-radius:999px; color:#374151}
-
+    .tb-item:hover{background:#f8fafc;}
+    .tb-item.active{background:#eef2ff;}
+    .tb-avatar{width:42px;height:42px;border-radius:999px;background:#e5e7eb;display:grid;place-items:center;font-weight:700;}
+    .tb-meta{flex:1; min-width:0;}
+    .tb-name{font-weight:600; font-size:14px;}
+    .tb-pill{font-size:10px; border:1px solid #e5e7eb; padding:2px 6px; border-radius:999px; color:#374151;}
     .tb-conv{display:flex; flex-direction:column;}
-    .tb-conv-head{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #e5e7eb}
-    .tb-conv-title{font-weight:700}
-    .tb-status{margin-left:auto; display:flex; gap:6px}
-    .tb-status button{font-size:11px; padding:4px 8px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; cursor:pointer}
-    .tb-status button.active{background:var(--tb-primary); color:#fff; border-color:var(--tb-primary)}
-
-    .tb-messages{flex:1; overflow:auto; background:linear-gradient(#fff,#f8fafc); padding:16px}
+    .tb-conv-head{display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid #e5e7eb;}
+    .tb-status{margin-left:auto; display:flex; gap:6px;}
+    .tb-status button{font-size:11px; padding:4px 8px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; cursor:pointer;}
+    .tb-status button.active{background:var(--tb-primary); color:#fff; border-color:var(--tb-primary);}
+    .tb-messages{flex:1; overflow:auto; background:linear-gradient(#fff,#f8fafc); padding:16px;}
     .tb-bubble{max-width:72%; padding:10px 12px; border-radius:14px; margin:6px 0; font-size:14px; line-height:1.35; box-shadow:0 1px 2px rgba(0,0,0,.05);}
-    .tb-bubble.me{margin-left:auto; background:var(--tb-primary); color:#fff; border-bottom-right-radius:4px}
-    .tb-bubble.them{margin-right:auto; background:#eef2ff; color:#111; border-bottom-left-radius:4px}
-    .tb-bubble time{display:block; font-size:10px; opacity:.8; margin-top:4px}
-
-    .tb-compose{border-top:1px solid #e5e7eb; padding:10px; display:flex; gap:10px}
-    .tb-compose textarea{flex:1; resize:none; min-height:38px; max-height:110px; border:1px solid #e5e7eb; border-radius:10px; padding:9px 10px; font-size:14px}
-    .tb-send{background:var(--tb-primary); color:#fff; padding:10px 16px; border-radius:10px; font-weight:700}
-    .tb-send:disabled{background:#9bbde2}
-
-    @media (max-width: 700px){
-      .tb-body{grid-template-columns:1fr;}
-      .tb-side{display:none}
-    }
+    .tb-bubble.me{margin-left:auto; background:var(--tb-primary); color:#fff;}
+    .tb-bubble.them{margin-right:auto; background:#eef2ff; color:#111;}
+    .tb-compose{border-top:1px solid #e5e7eb; padding:10px; display:flex; gap:10px;}
+    .tb-compose textarea{flex:1; resize:none; min-height:38px; max-height:110px; border:1px solid #e5e7eb; border-radius:10px; padding:9px 10px; font-size:14px;}
+    .tb-send{background:var(--tb-primary); color:#fff; padding:10px 16px; border-radius:10px; font-weight:700;}
+    .tb-send:disabled{background:#9bbde2;}
   </style>
 </head>
+
 <body>
 
 <header>
-  <div class="logo">
-    <a href="admin.html">
-      <img src="TRACEBACK.png" alt="TraceBack Logo">
-    </a>
-  </div>
+  <div class="logo"><a href="admin.html"><img src="TRACEBACK.png" alt="TraceBack Logo"></a></div>
   <nav>
     <a href="add.html">Add Item</a>
     <a href="record.html" style="background:#1b263b; color:white;">Reports</a>
     <a href="camera.html">View Camera</a>
   </nav>
-  <a href="#" class="logout-btn" onclick="alert('Use the header on your main page to handle logout programmatically.')">Log Out</a>
+  <a href="#" class="logout-btn" onclick="alert('Logout handled in main page.')">Log Out</a>
 </header>
 
 <div class="content">
@@ -116,357 +97,122 @@
   <table id="reportTable">
     <thead>
       <tr>
-        <th>Ticket</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Item</th>
-        <th>Description</th>
-        <th>Location & Date</th>
-        <th>Photo</th>
-        <th>Status</th>
-        <th>Actions</th>
+        <th>Ticket</th><th>Name</th><th>Email</th><th>Item</th><th>Description</th>
+        <th>Location & Date</th><th>Photo</th><th>Status</th><th>Actions</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 </div>
 
-<!-- ===== CHAT FAB + WINDOW ===== -->
+<!-- Chat Widget -->
 <button id="tbFab" class="tb-fab" title="Open inbox">💬</button>
-
 <div id="tbChat" class="tb-window" aria-hidden="true">
   <div class="tb-head">
-    <div class="brand">
-      <div class="logo">TB</div>
-      <div>
-        <div class="title">Inbox</div>
-        <div class="subtitle">Customers & Tickets</div>
-      </div>
-    </div>
-    <div class="actions">
-      <button id="tbMin">–</button>
-      <button id="tbClose">✕</button>
-    </div>
+    <div class="brand"><div class="logo">TB</div><div><div class="title">Inbox</div><div class="subtitle">Customers & Tickets</div></div></div>
+    <div class="actions"><button id="tbMin">–</button><button id="tbClose">✕</button></div>
   </div>
-
   <div class="tb-body">
     <aside class="tb-side">
-      <div class="tb-tabs">
-        <div class="tb-tab-wrap">
-          <button id="tabContact" class="tab">Contact</button>
-          <button id="tabTickets" class="tab active">Tickets</button>
-        </div>
-      </div>
+      <div class="tb-tabs"><div class="tb-tab-wrap"><button id="tabContact" class="tab">Contact</button><button id="tabTickets" class="tab active">Tickets</button></div></div>
       <div class="tb-search"><input id="tbSearch" placeholder="Search…" /></div>
-      <div id="tbList" class="tb-list" role="listbox" aria-label="Threads"></div>
+      <div id="tbList" class="tb-list"></div>
     </aside>
-
     <section class="tb-conv">
-      <div class="tb-conv-head">
-        <div class="tb-avatar" id="tbAvatar">T</div>
-        <div>
-          <div class="tb-conv-title" id="tbTitle">Select a conversation</div>
-          <div id="tbSubtitle" class="subtitle"></div>
-        </div>
-        <div class="tb-status" id="tbStatusBtns" style="display:none">
-          <button data-status="Open">Open</button>
-          <button data-status="Pending">Pending</button>
-          <button data-status="Resolved">Resolved</button>
-        </div>
-      </div>
-
-      <div id="tbMessages" class="tb-messages" aria-live="polite"></div>
-
-      <div class="tb-compose">
-        <textarea id="tbInput" placeholder="Type a message… (Enter to send)"></textarea>
-        <button id="tbSend" class="tb-send" disabled>Send</button>
-      </div>
+      <div class="tb-conv-head"><div class="tb-avatar">T</div><div><div id="tbTitle" class="tb-conv-title">Select a conversation</div></div>
+      <div class="tb-status" id="tbStatusBtns" style="display:none"><button data-status="Open">Open</button><button data-status="Pending">Pending</button><button data-status="Resolved">Resolved</button></div></div>
+      <div id="tbMessages" class="tb-messages"></div>
+      <div class="tb-compose"><textarea id="tbInput" placeholder="Type a message… (Enter to send)"></textarea><button id="tbSend" class="tb-send" disabled>Send</button></div>
     </section>
   </div>
 </div>
 
 <script>
-  /* ========== Reports table: load + migrate IDs/status ========== */
-  const tbody = document.querySelector("#reportTable tbody");
-  const nowIso = new Date().toISOString();
-  function makeId(seed){ return "TKT-" + (Date.now().toString().slice(-6)) + "-" + seed; }
+  const CLAIMED_STATES=["Resolved","Claimed"];
+  const isClaimed=r=>CLAIMED_STATES.includes((r.status||"").trim());
+  const tbody=document.querySelector("#reportTable tbody");
 
-  // Ensure each report has: ticketId, createdAt, status
-  let reports = JSON.parse(localStorage.getItem("reports") || "[]");
-  let mutated = false;
-  reports = reports.map((r, i) => {
-    if(!r.ticketId){ r.ticketId = makeId(i); mutated = true; }
-    if(!r.createdAt){ r.createdAt = nowIso; mutated = true; }
-    if(!r.status){ r.status = "Open"; mutated = true; }
+  function loadReports(){
+    let r=JSON.parse(localStorage.getItem("reports")||"[]");
+    r.forEach((x,i)=>{if(!x.ticketId)x.ticketId="TKT-"+(Date.now().toString().slice(-6))+"-"+i;if(!x.status)x.status="Open";});
+    localStorage.setItem("reports",JSON.stringify(r));
     return r;
-  });
-  if(mutated) localStorage.setItem("reports", JSON.stringify(reports));
+  }
+  function saveReports(r){localStorage.setItem("reports",JSON.stringify(r));}
 
-  if (reports.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#777;">No reports submitted yet</td></tr>`;
-  } else {
-    reports.forEach((r, i) => {
-      tbody.insertAdjacentHTML('beforeend', `
-        <tr data-index="${i}" data-ticket="${r.ticketId}">
-          <td><strong>${r.ticketId}</strong></td>
-          <td>${escapeHtml(r.name || "")}</td>
-          <td>${escapeHtml(r.email || "")}</td>
-          <td>${escapeHtml(r.item || "")}</td>
-          <td>${escapeHtml(r.desc || "")}</td>
-          <td>${escapeHtml(r.location || "")}${r.date ? `, ${r.date}` : ""}</td>
-          <td>${r.photo ? `<img src="${r.photo}" alt="Item photo">` : "No Photo"}</td>
-          <td class="status-cell">${r.status}</td>
-          <td>
-            <button class="found-btn">Found Item</button>
-            <button class="claim-btn"${r.status==="Resolved"?" disabled":""}>${r.status==="Resolved"?"Claimed":"Claim"}</button>
-          </td>
-        </tr>
-      `);
-    });
+  function renderTable(){
+    const reports=loadReports().filter(r=>!isClaimed(r)).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    tbody.innerHTML="";
+    if(!reports.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:#777;">No active reports</td></tr>';return;}
+    reports.forEach(r=>{
+      tbody.insertAdjacentHTML('beforeend',`
+      <tr data-ticket="${r.ticketId}">
+        <td>${r.ticketId}</td><td>${r.name||""}</td><td>${r.email||""}</td>
+        <td>${r.item||""}</td><td>${r.desc||""}</td>
+        <td>${r.location||""}${r.date?", "+r.date:""}</td>
+        <td>${r.photo?`<img src="${r.photo}">`:"No Photo"}</td>
+        <td class="status-cell">${r.status}</td>
+        <td><button class="found-btn">Found Item</button><button class="claim-btn">Claim</button></td>
+      </tr>`);});
   }
 
-  /* ========== Row actions -> open chat or mark claimed ========== */
-  document.getElementById("reportTable").addEventListener("click", (e) => {
-    const row = e.target.closest("tr");
-    if(!row) return;
-    const idx = Number(row.dataset.index);
-    const r = (JSON.parse(localStorage.getItem("reports")) || [])[idx];
-    if(!r) return;
-
-    if (e.target.classList.contains("found-btn")) {
-      // Ensure thread exists
-      const key = "tb_ticket_" + r.ticketId;
-      if(!localStorage.getItem(key)){
-        localStorage.setItem(key, JSON.stringify([]));
-      }
-      // Open chat widget directly on this ticket, prefill message
-      openChat();
-      setTab("tickets");
-      openThread({id:r.ticketId, type:"ticket"});
-      const canned = `Hello ${r.name || "there"}, your item "${r.item || ""}" appears to be found at ${r.location || "the station"}${r.date?` (${r.date})`:""}. Can you confirm it's yours?`;
-      INPUT.value = canned.trim();
-      SEND.disabled = !INPUT.value.trim();
-      INPUT.focus();
+  document.getElementById("reportTable").addEventListener("click",e=>{
+    const row=e.target.closest("tr");if(!row)return;
+    const id=row.dataset.ticket;
+    let r=loadReports();const i=r.findIndex(x=>x.ticketId===id);if(i<0)return;
+    if(e.target.classList.contains("found-btn")){
+      openChat();setTab("tickets");openThread({id,type:"ticket"});
+      const m=`Hello ${r[i].name||"there"}, your item "${r[i].item||""}" was found at ${r[i].location||"the station"}${r[i].date?` (${r[i].date})`:""}.`;
+      INPUT.value=m;SEND.disabled=false;INPUT.focus();
     }
-
-    if (e.target.classList.contains("claim-btn")) {
-      const data = JSON.parse(localStorage.getItem("reports")) || [];
-      if (data[idx]) {
-        data[idx].status = "Resolved";
-        localStorage.setItem("reports", JSON.stringify(data));
-        row.querySelector(".status-cell").textContent = "Resolved";
-        e.target.disabled = true;
-        e.target.textContent = "Claimed";
-        // If chat open on this ticket, reflect status buttons
-        if(selectedThread && selectedThread.id === r.ticketId){
-          renderStatusButtons("Resolved");
-        }
-        renderList(); // refresh tickets list statuses
-      }
+    if(e.target.classList.contains("claim-btn")){
+      r[i].status="Resolved";saveReports(r);row.remove();if(!tbody.querySelector("tr"))renderTable();renderList();
     }
   });
 
-  function escapeHtml(s){ return (s||"").replace(/[&<>'"]/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;" }[m])); }
+  window.addEventListener("storage",e=>{if(e.key==="reports"){renderTable();renderList();}});
 
-  /* ========== Unified Chat (Admin → User) ========== */
-  const IS_ADMIN = true;
+  const CHAT=document.getElementById("tbChat"),FAB=document.getElementById("tbFab"),BTN_CLOSE=document.getElementById("tbClose"),BTN_MIN=document.getElementById("tbMin");
+  const TAB_CONTACT=document.getElementById("tabContact"),TAB_TICKETS=document.getElementById("tabTickets"),LIST=document.getElementById("tbList");
+  const INPUT_SEARCH=document.getElementById("tbSearch"),INPUT=document.getElementById("tbInput"),SEND=document.getElementById("tbSend");
+  const MSGS=document.getElementById("tbMessages"),TITLE=document.getElementById("tbTitle"),STATUS_BTNS=document.getElementById("tbStatusBtns");
+  let currentTab="tickets",selectedThread=null;
+  FAB.onclick=()=>CHAT.classList.add("open");
+  BTN_CLOSE.onclick=BTN_MIN.onclick=()=>CHAT.classList.remove("open");
 
-  const FAB = document.getElementById("tbFab");
-  const CHAT = document.getElementById("tbChat");
-  const BTN_MIN = document.getElementById("tbMin");
-  const BTN_CLOSE = document.getElementById("tbClose");
-  const TAB_CONTACT = document.getElementById("tabContact");
-  const TAB_TICKETS = document.getElementById("tabTickets");
-  const INPUT_SEARCH = document.getElementById("tbSearch");
-  const LIST = document.getElementById("tbList");
-  const MSGS = document.getElementById("tbMessages");
-  const INPUT = document.getElementById("tbInput");
-  const SEND = document.getElementById("tbSend");
-  const TITLE = document.getElementById("tbTitle");
-  const SUBTITLE = document.getElementById("tbSubtitle");
-  const STATUS_BTNS = document.getElementById("tbStatusBtns");
+  function setTab(n){currentTab=n;TAB_CONTACT.classList.toggle("active",n==="contact");TAB_TICKETS.classList.toggle("active",n==="tickets");renderList();}
+  TAB_CONTACT.onclick=()=>setTab("contact");
+  TAB_TICKETS.onclick=()=>setTab("tickets");
+  INPUT.oninput=()=>SEND.disabled=!INPUT.value.trim();
+  INPUT.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();doSend();}};
+  SEND.onclick=doSend;INPUT_SEARCH.oninput=renderList;
 
-  const CONTACT_ID = "contact-admin";
-  const CONTACT_KEY = "tb_contact_admin";
-  let currentTab = "tickets"; // default to Tickets on this page
-  let selectedThread = null;  // {id, type}
-
-  function openChat(){ CHAT.classList.add("open"); CHAT.setAttribute("aria-hidden","false"); }
-  function closeChat(){ CHAT.classList.remove("open"); CHAT.setAttribute("aria-hidden","true"); }
-  FAB.addEventListener("click", openChat);
-  BTN_MIN.addEventListener("click", closeChat);
-  BTN_CLOSE.addEventListener("click", closeChat);
-
-  function setTab(name){
-    currentTab = name;
-    TAB_CONTACT.classList.toggle("active", name==="contact");
-    TAB_TICKETS.classList.toggle("active", name==="tickets");
-    renderList(); clearConversation();
-  }
-  TAB_CONTACT.addEventListener("click", ()=> setTab("contact"));
-  TAB_TICKETS.addEventListener("click", ()=> setTab("tickets"));
-
-  INPUT.addEventListener("input", ()=>{ SEND.disabled = !INPUT.value.trim(); });
-  INPUT.addEventListener("keydown", (e)=>{ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); doSend(); }});
-  SEND.addEventListener("click", doSend);
-  INPUT_SEARCH.addEventListener("input", renderList);
-
-  STATUS_BTNS.addEventListener("click", (e)=>{
-    if(!selectedThread || selectedThread.type!=="ticket") return;
-    const btn = e.target.closest("button"); if(!btn) return;
-    const reports = JSON.parse(localStorage.getItem("reports")||"[]");
-    const idx = reports.findIndex(r=>r.ticketId===selectedThread.id);
-    if(idx>-1){ reports[idx].status = btn.dataset.status; localStorage.setItem("reports", JSON.stringify(reports)); }
-    renderStatusButtons(btn.dataset.status);
-    // update table row if present
-    const row = document.querySelector(`tr[data-ticket="${selectedThread.id}"] .status-cell`);
-    if(row) row.textContent = btn.dataset.status;
-    renderList();
-  });
-
-  function clearConversation(){
-    TITLE.textContent = "Select a conversation";
-    SUBTITLE.textContent = "";
-    MSGS.innerHTML = "";
-    STATUS_BTNS.style.display = "none";
-  }
-
-  function fmtTime(iso){ try{const d=new Date(iso);return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});}catch{return "";} }
-
+  function fmtTime(t){try{return new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});}catch{return"";}}
   function renderList(){
-    const q = (INPUT_SEARCH.value || "").trim().toLowerCase();
-    LIST.innerHTML = "";
-
-    if(currentTab==="contact"){
-      const lastArr = JSON.parse(localStorage.getItem(CONTACT_KEY)||"[]");
-      const last = lastArr.slice(-1)[0]?.text || "Start a conversation";
-      const time = lastArr.slice(-1)[0]?.at || new Date().toISOString();
-
-      const el = document.createElement("div");
-      el.className = "tb-item" + (selectedThread?.id===CONTACT_ID ? " active":"");
-      el.innerHTML = `
-        <div class="tb-avatar">U</div>
-        <div class="tb-meta">
-          <div class="tb-line">
-            <div class="tb-name">Customer DM</div>
-            <div class="tb-time">${fmtTime(time)}</div>
-          </div>
-          <div class="tb-last">${escapeHtml(last)}</div>
-        </div>`;
-      if(!q || "customer dm".includes(q)){
-        el.onclick = ()=> openThread({id:CONTACT_ID, type:"contact"});
-        LIST.appendChild(el);
-      } else {
-        LIST.innerHTML = '<div class="tb-item"><div class="tb-meta">No results</div></div>';
-      }
-    } else {
-      const reports = JSON.parse(localStorage.getItem("reports")||"[]");
-      const filtered = reports.filter(r=>{
-        const hay = (r.ticketId+" "+(r.item||"")+" "+(r.location||"")+" "+(r.status||"")).toLowerCase();
-        return hay.includes(q);
-      }).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
-
-      if(filtered.length===0){
-        LIST.innerHTML = '<div class="tb-item"><div class="tb-meta">No tickets yet</div></div>';
-      } else {
-        filtered.forEach(r=>{
-          const messages = JSON.parse(localStorage.getItem("tb_ticket_"+r.ticketId)||"[]");
-          const last = messages.slice(-1)[0]?.text || r.desc || "(no messages)";
-          const time = messages.slice(-1)[0]?.at || r.createdAt;
-
-          const row = document.createElement("div");
-          row.className = "tb-item" + (selectedThread?.id===r.ticketId ? " active":"");
-          row.innerHTML = `
-            <div class="tb-avatar">T</div>
-            <div class="tb-meta">
-              <div class="tb-line">
-                <div class="tb-name">${r.ticketId}</div>
-                <div class="tb-time">${fmtTime(time)}</div>
-              </div>
-              <div class="tb-last">${escapeHtml(r.item || "")} • <span class="tb-pill">${r.status}</span></div>
-            </div>`;
-          row.onclick = ()=> openThread({id:r.ticketId, type:"ticket"});
-          LIST.appendChild(row);
-        });
-      }
-    }
+    const q=(INPUT_SEARCH.value||"").toLowerCase();LIST.innerHTML="";
+    const reports=loadReports().filter(r=>!isClaimed(r)).filter(r=>(r.item||"").toLowerCase().includes(q));
+    if(!reports.length){LIST.innerHTML='<div class="tb-item"><div>No tickets</div></div>';return;}
+    reports.forEach(r=>{
+      const row=document.createElement("div");row.className="tb-item";row.innerHTML=`<div class="tb-avatar">T</div><div class="tb-meta"><div class="tb-name">${r.ticketId}</div><div class="tb-pill">${r.status}</div></div>`;
+      row.onclick=()=>openThread({id:r.ticketId,type:"ticket"});LIST.appendChild(row);
+    });
   }
 
   function openThread(t){
-    selectedThread = t;
-    MSGS.innerHTML = "";
-    if(t.type==="contact"){
-      TITLE.textContent = "Customer DM";
-      SUBTITLE.textContent = "Direct messages with user";
-      STATUS_BTNS.style.display = "none";
-      renderMessages(CONTACT_KEY);
-    } else {
-      TITLE.textContent = t.id + " — Ticket";
-      SUBTITLE.textContent = "Ticket conversation";
-      STATUS_BTNS.style.display = "flex";
-      const reports = JSON.parse(localStorage.getItem("reports")||"[]");
-      const found = reports.find(r=>r.ticketId===t.id);
-      renderStatusButtons(found?.status || "Open");
-      renderMessages("tb_ticket_"+t.id);
-    }
-    setTimeout(()=>INPUT.focus(),0);
-  }
-
-  function renderStatusButtons(active){
-    Array.from(STATUS_BTNS.querySelectorAll("button")).forEach(b=>{
-      b.classList.toggle("active", b.dataset.status===active);
-    });
-  }
-
-  // Flip sides for admin viewer: stored 'them' (admin) -> right side here
-  function bubbleClassFor(storedSender){
-    return IS_ADMIN ? (storedSender === 'them' ? 'me' : 'them') : (storedSender === 'me' ? 'me' : 'them');
-  }
-
-  function renderMessages(storageKey){
-    const arr = JSON.parse(localStorage.getItem(storageKey)||"[]");
-    arr.forEach(m=>{
-      const storedSender = m.sender ?? (m.by === 'admin' ? 'them' : 'me');
-      appendBubble(bubbleClassFor(storedSender), m.text, m.at);
-    });
-    MSGS.scrollTop = MSGS.scrollHeight + 9999;
-    SEND.disabled = !INPUT.value.trim();
-  }
-
-  function appendBubble(side, text, at){
-    const div = document.createElement("div");
-    div.className = "tb-bubble " + (side === 'me' ? 'me' : 'them');
-    div.innerHTML = `${escapeHtml(text)}<time>${fmtTime(at)}</time>`;
-    MSGS.appendChild(div);
+    selectedThread=t;MSGS.innerHTML="";
+    const r=loadReports().find(x=>x.ticketId===t.id);if(!r||isClaimed(r)){renderTable();renderList();return;}
+    TITLE.textContent=t.id;STATUS_BTNS.style.display="flex";
   }
 
   function doSend(){
-    if(!selectedThread) return;
-    const text = INPUT.value.trim(); if(!text) return;
-    const at = new Date().toISOString();
-    const key = selectedThread.type==="contact" ? CONTACT_KEY : ("tb_ticket_"+selectedThread.id);
-    const arr = JSON.parse(localStorage.getItem(key)||"[]");
-    // Store as admin message so it shows "from staff" on user pages
-    const stored = { sender:"them", by:"admin", text, at };
-    arr.push(stored);
-    localStorage.setItem(key, JSON.stringify(arr));
-    appendBubble('me', text, at); // right side here
-    INPUT.value = ""; SEND.disabled = true;
-    renderList();
+    if(!selectedThread)return;const text=INPUT.value.trim();if(!text)return;
+    const arr=JSON.parse(localStorage.getItem("tb_ticket_"+selectedThread.id)||"[]");
+    arr.push({text,at:new Date().toISOString(),by:"admin"});localStorage.setItem("tb_ticket_"+selectedThread.id,JSON.stringify(arr));
+    INPUT.value="";SEND.disabled=true;
   }
 
-  // Initial render
-  renderList();
-
-  // Open widget if needed via URL hash e.g. record.html#ticket=TKT-123
-  (function autoOpenByHash(){
-    const params = new URLSearchParams(location.hash.replace(/^#/, ''));
-    const t = params.get('ticket');
-    if(t){
-      openChat(); setTab("tickets"); openThread({id:t, type:"ticket"});
-    }
-  })();
+  renderTable();renderList();
 </script>
-
 </body>
 </html>
+
