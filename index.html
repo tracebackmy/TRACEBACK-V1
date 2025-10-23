@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,14 +17,50 @@
     .content h2 { font-size:28px; color:#1b263b; }
     .content p { font-size:16px; color:#333; max-width:900px; line-height:1.6; }
 
+    /* ===== Modal Base ===== */
     .modal { display:none; position:fixed; z-index:10; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; }
-    .modal-content { background:#fff; padding:30px; border-radius:12px; width:360px; box-shadow:0 4px 8px rgba(0,0,0,0.3); text-align:center; animation:fadeIn 0.3s ease; }
+
+    /* Default modal styling (Admin, Login) */
+    .modal-content {
+      background:#fff;
+      padding:30px;
+      border-radius:12px;
+      width:360px;
+      box-shadow:0 4px 8px rgba(0,0,0,0.3);
+      text-align:center;
+      animation:fadeIn 0.3s ease;
+    }
+
+    /* Register modal - scrollable */
+    #registerModal .modal-content {
+      max-height: 90vh;         /* Limit height to 90% of viewport */
+      overflow-y: auto;         /* Enable vertical scrolling */
+      scrollbar-width: thin;
+      scrollbar-color: #1b263b #e0e0e0;
+    }
+
+    #registerModal .modal-content::-webkit-scrollbar { width: 6px; }
+    #registerModal .modal-content::-webkit-scrollbar-thumb {
+      background-color: #1b263b;
+      border-radius: 6px;
+    }
+    #registerModal .modal-content::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+    }
+
     .modal-content h2 { margin-bottom:15px; color:#1b263b; }
     .modal-content img { display:block; margin:0 auto 15px auto; height:60px; }
     .modal-content input[type="email"],
     .modal-content input[type="password"],
-    .modal-content input[type="text"] { width:90%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #ccc; font-size:14px; }
-    .modal-content button { padding:10px 20px; background:#1b263b; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold; margin-top:10px; width:100%; }
+    .modal-content input[type="text"] {
+      width:90%; padding:10px; margin:10px 0; border-radius:6px;
+      border:1px solid #ccc; font-size:14px;
+    }
+    .modal-content button {
+      padding:10px 20px; background:#1b263b; color:white;
+      border:none; border-radius:6px; cursor:pointer;
+      font-weight:bold; margin-top:10px; width:100%;
+    }
     .modal-content button:hover { background:#415a77; }
     .close-btn { float:right; font-size:22px; cursor:pointer; color:#888; }
     .close-btn:hover { color:#000; }
@@ -149,7 +185,6 @@
   }
 
   function registerUser(){
-    // basic form checks (IC verification will control the button state)
     const name=document.getElementById("regName").value.trim();
     const email=document.getElementById("regEmail").value.trim();
     const pass=document.getElementById("regPass").value;
@@ -188,185 +223,6 @@
     } else {
       alert("❌ Invalid admin credentials!");
     }
-  }
-
-  /* =========================
-     IC IMAGE VERIFICATION
-     ========================= */
-  const MAX_SIZE = 5 * 1024 * 1024; // 5MB
-  const MIN_W = 800;
-  const MIN_H = 500;
-  const MIN_BRIGHTNESS = 60; // 0-255 average
-  const MIN_SHARPNESS = 15;  // variance of Laplacian (heuristic)
-
-  const icFront = document.getElementById('icFront');
-  const icBack  = document.getElementById('icBack');
-  const statusFront = document.getElementById('icFrontStatus');
-  const statusBack  = document.getElementById('icBackStatus');
-  const thumbFront  = document.getElementById('thumbFront');
-  const thumbBack   = document.getElementById('thumbBack');
-  const registerBtn = document.getElementById('registerBtn');
-
-  let okFront = false;
-  let okBack  = false;
-
-  icFront.addEventListener('change', () => verifyIC(icFront, statusFront, thumbFront, (ok)=>{ okFront = ok; updateRegisterState(); }));
-  icBack.addEventListener('change',  () => verifyIC(icBack,  statusBack,  thumbBack,  (ok)=>{ okBack  = ok; updateRegisterState(); }));
-
-  function updateRegisterState(){
-    if (okFront && okBack){
-      registerBtn.disabled = false;
-      registerBtn.classList.remove('disabled');
-    } else {
-      registerBtn.disabled = true;
-      registerBtn.classList.add('disabled');
-    }
-  }
-
-  function verifyIC(fileInput, statusEl, thumbEl, cb){
-    statusEl.innerHTML = '';
-    thumbEl.innerHTML = '';
-    const file = fileInput.files && fileInput.files[0];
-    if(!file){ cb(false); return; }
-
-    // type & size
-    if(!file.type.startsWith('image/')){
-      statusEl.innerHTML = `<span class="err">Invalid file type. Please upload an image.</span>`;
-      cb(false); return;
-    }
-    if(file.size > MAX_SIZE){
-      statusEl.innerHTML = `<span class="err">File too large. Max 5 MB.</span>`;
-      cb(false); return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e){
-      const img = new Image();
-      img.onload = async function(){
-        // orientation
-        if(img.width <= img.height){
-          statusEl.innerHTML = `<span class="err">Please use a landscape photo (card width must be larger than height).</span>`;
-          cb(false); return;
-        }
-
-        // resolution
-        if(img.width < MIN_W || img.height < MIN_H){
-          statusEl.innerHTML = `<span class="err">Image too small. Minimum ${MIN_W}×${MIN_H} required.</span>`;
-          cb(false); return;
-        }
-
-        // draw to canvas for analysis
-        const {brightness, sharpness} = analyzeImage(img);
-
-        // messages
-        let ok = true;
-        let msgs = [];
-
-        if(brightness < MIN_BRIGHTNESS){
-          ok = false;
-          msgs.push(`<span class="err">Too dark (avg brightness ${brightness.toFixed(0)}). Use better lighting.</span>`);
-        } else if (brightness < MIN_BRIGHTNESS + 20){
-          msgs.push(`<span class="warn">A bit dark (avg ${brightness.toFixed(0)}). Try brighter lighting.</span>`);
-        } else {
-          msgs.push(`<span class="ok">Brightness OK (${brightness.toFixed(0)}).</span>`);
-        }
-
-        if(sharpness < MIN_SHARPNESS){
-          ok = false;
-          msgs.push(`<span class="err">Too blurry (sharpness ${sharpness.toFixed(1)}). Hold steady & refocus.</span>`);
-        } else if (sharpness < MIN_SHARPNESS + 10){
-          msgs.push(`<span class="warn">Slight blur (sharpness ${sharpness.toFixed(1)}). Consider a clearer shot.</span>`);
-        } else {
-          msgs.push(`<span class="ok">Sharpness OK (${sharpness.toFixed(1)}).</span>`);
-        }
-
-        if(ok){
-          msgs.unshift(`<span class="ok">Verified ✓</span>`);
-        }
-
-        statusEl.innerHTML = msgs.join('<br>');
-
-        // small preview
-        thumbEl.innerHTML = `<img src="${e.target.result}" alt="preview">`;
-
-        cb(ok);
-      };
-      img.onerror = function(){
-        statusEl.innerHTML = `<span class="err">Could not read image. Try another file.</span>`;
-        cb(false);
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function analyzeImage(img){
-    // Create canvas
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    // Downscale for speed (keep aspect)
-    const MAX_SIDE = 640;
-    let w = img.width, h = img.height;
-    if (Math.max(w,h) > MAX_SIDE){
-      const scale = MAX_SIDE / Math.max(w,h);
-      w = Math.round(w * scale);
-      h = Math.round(h * scale);
-    }
-    canvas.width = w;
-    canvas.height = h;
-    ctx.drawImage(img, 0, 0, w, h);
-
-    // Brightness (average of grayscale)
-    const imgData = ctx.getImageData(0,0,w,h);
-    const data = imgData.data;
-    let sum = 0;
-    for(let i=0;i<data.length;i+=4){
-      // luminance
-      const lum = 0.2126*data[i] + 0.7152*data[i+1] + 0.0722*data[i+2];
-      sum += lum;
-    }
-    const brightness = sum / (w*h);
-
-    // Sharpness: variance of Laplacian (simple)
-    // Convert to grayscale
-    const gray = new Float32Array(w*h);
-    for(let i=0, p=0;i<data.length;i+=4, p++){
-      gray[p] = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
-    }
-    // 3x3 Laplacian kernel
-    const k = [0, 1, 0,
-               1,-4, 1,
-               0, 1, 0];
-    const lap = new Float32Array(w*h);
-    for(let y=1;y<h-1;y++){
-      for(let x=1;x<w-1;x++){
-        let acc = 0;
-        acc += k[1]*gray[y*w + (x-1)];
-        acc += k[3]*gray[(y-1)*w + x];
-        acc += k[4]*gray[y*w + x]   ; // -4 * center
-        acc += k[5]*gray[(y+1)*w + x];
-        acc += k[7]*gray[y*w + (x+1)];
-        lap[y*w + x] = acc;
-      }
-    }
-    // variance
-    let mean = 0;
-    let count = 0;
-    for(let i=0;i<lap.length;i++){
-      const v = lap[i];
-      mean += v;
-      count++;
-    }
-    mean /= count;
-    let variance = 0;
-    for(let i=0;i<lap.length;i++){
-      const d = lap[i] - mean;
-      variance += d*d;
-    }
-    variance /= count;
-
-    return {brightness, sharpness: variance};
   }
 </script>
 </body>
